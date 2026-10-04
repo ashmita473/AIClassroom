@@ -1,0 +1,2 @@
+@model AIClassroom.Models.CurriculumDay
+@{ViewData["Title"]=Model.Title;}<div class="form-card pixel"><div class="eyebrow">@Model.Module!.Code · DAY @Model.DayNumber</div><h1>@Model.Title</h1><p>@Model.ContentSummary</p>@if(Model.IsLocked){<div class="warning">🔒 This mission is locked by the teacher.</div>}else{<a class="big-btn primary" asp-controller="Student" asp-action="Lesson" asp-route-id="@Model.Id">🚀 Open Lesson</a>}</div>

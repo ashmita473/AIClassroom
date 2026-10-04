@@ -1,0 +1,4 @@
+@model List<AIClassroom.Models.Game>
+@{ViewData["Title"]="Games";}
+<div class="page-title"><div><div class="eyebrow">LEARNING ARCADE</div><h1>🎮 Games</h1></div><a class="big-btn primary" asp-action="AddGame">+ Add Game</a></div>
+<div class="table-wrap pixel"><table><thead><tr><th>Game</th><th>Group</th><th>Type</th><th>XP</th><th>Status</th></tr></thead><tbody>@foreach(var g in Model){<tr><td>🎮 @g.Name</td><td>@g.GroupName</td><td>@g.GameType</td><td>@g.BaseXp</td><td>@(g.IsActive?"Active":"Off")</td></tr>}</tbody></table></div>

@@ -1,0 +1,4 @@
+@model List<AIClassroom.Models.QuizResult>
+@{ViewData["Title"]="Quiz Results";}
+<div class="page-title"><div><div class="eyebrow">KNOWLEDGE LAB</div><h1>Quiz Results</h1></div></div>
+<div class="table-wrap panel pixel"><table><thead><tr><th>Student</th><th>Quiz</th><th>Score</th><th>Correct</th><th>Wrong</th><th>Skipped</th><th>Time</th><th>Result</th></tr></thead><tbody>@foreach(var r in Model){<tr><td>@r.Student?.Name</td><td>@r.Quiz?.Title</td><td>@r.Score%</td><td>@r.Correct</td><td>@r.Wrong</td><td>@r.Skipped</td><td>@TimeSpan.FromSeconds(r.TimeTakenSeconds).ToString(@"mm\:ss")</td><td>@(r.Passed?"Passed":"Needs Revision")</td></tr>}</tbody></table></div>

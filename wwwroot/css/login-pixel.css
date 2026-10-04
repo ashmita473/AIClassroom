@@ -1,0 +1,455 @@
+:root {
+    --pink: #ff5fca;
+    --pink-light: #ff9be2;
+    --purple: #9b5cff;
+    --deep: #100b38;
+    --ink: #171044;
+    --text: #f9f4ff;
+    --muted: #c9c1ed;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; min-height: 100%; }
+body { overflow: hidden; background: #100b38; }
+
+.login-world {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    min-height: 620px;
+    overflow: hidden;
+    font-family: 'VT323', monospace;
+    background: #100b38;
+    isolation: isolate;
+}
+
+/* The artwork is separated from the UI so the whole world can gently drift without moving the login card. */
+.scene-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url('/images/ai-classroom-login-bg.png');
+    background-position: center center;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    transform: none;
+    filter: saturate(1.03) contrast(1.035);
+    will-change: auto;
+}
+
+.scene-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
+    background-size: 6px 6px;
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+
+/* Animated atmospheric details */
+.motion-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.shooting-star {
+    position: absolute;
+    left: 69%;
+    top: 12%;
+    width: 105px;
+    height: 4px;
+    opacity: 0;
+    transform: rotate(-29deg);
+    transform-origin: right center;
+    background: linear-gradient(90deg, transparent, #fff4ff 48%, #ff8ee4 100%);
+    box-shadow: 0 0 8px #fff, 0 0 18px #ff6bd6;
+    animation: shootingStar 5.8s linear infinite;
+}
+.shooting-star::after {
+    content: '';
+    position: absolute;
+    right: -3px;
+    top: -5px;
+    width: 12px;
+    height: 12px;
+    background: #fff8ff;
+    box-shadow: 0 0 10px #fff, 0 0 20px #ff8be1;
+}
+
+@keyframes shootingStar {
+    0%, 68% { opacity: 0; transform: translate3d(0,0,0) rotate(-29deg) scaleX(.45); }
+    70% { opacity: 1; }
+    76% { opacity: 1; transform: translate3d(-330px, 210px, 0) rotate(-29deg) scaleX(1); }
+    79%, 100% { opacity: 0; transform: translate3d(-390px, 248px, 0) rotate(-29deg) scaleX(1.15); }
+}
+
+/* Tiny pixel leaves drift near the left tree to give the scene a light-breeze effect. */
+.breeze-leaf {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background: #ff82d4;
+    box-shadow: 3px 3px 0 #9b5cff;
+    opacity: 0;
+    animation: leafBreeze 6s ease-in-out infinite;
+}
+.leaf-1 { left: 7%; top: 31%; animation-delay: .2s; }
+.leaf-2 { left: 11%; top: 38%; animation-delay: 2.1s; transform: scale(.8); }
+.leaf-3 { left: 5%; top: 47%; animation-delay: 3.5s; transform: scale(.65); }
+.leaf-4 { left: 14%; top: 29%; animation-delay: 4.3s; transform: scale(.7); }
+
+@keyframes leafBreeze {
+    0% { opacity: 0; transform: translate3d(0,0,0) rotate(0deg); }
+    18% { opacity: .9; }
+    60% { opacity: .85; transform: translate3d(62px, 35px, 0) rotate(110deg); }
+    100% { opacity: 0; transform: translate3d(120px, 68px, 0) rotate(230deg); }
+}
+
+/* Floating pixel motes add gentle motion without cluttering the artwork. */
+.pixel-mote {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: #ffd1f2;
+    box-shadow: 0 0 7px rgba(255, 150, 222, .8);
+    opacity: .45;
+    animation: moteFloat 4.5s ease-in-out infinite;
+}
+.mote-1 { left: 27%; top: 22%; animation-delay: .4s; }
+.mote-2 { left: 74%; top: 31%; animation-delay: 1.5s; }
+.mote-3 { left: 86%; top: 44%; animation-delay: 2.8s; }
+.mote-4 { left: 19%; top: 62%; animation-delay: 3.2s; }
+
+@keyframes moteFloat {
+    0%,100% { transform: translateY(0); opacity: .25; }
+    50% { transform: translateY(-10px); opacity: .75; }
+}
+
+
+
+/* Independent robot sprites: crisp, foreground motion rather than moving the whole artwork. */
+.floating-robot {
+    position: absolute;
+    z-index: 4;
+    pointer-events: none;
+    user-select: none;
+    image-rendering: pixelated;
+    will-change: transform;
+    filter: drop-shadow(0 0 5px rgba(104, 229, 255, .28));
+}
+
+.robot-float-left {
+    width: clamp(92px, 10vw, 165px);
+    left: 18%;
+    top: 31%;
+    animation: robotFloatLeft 4.6s ease-in-out infinite;
+}
+
+.robot-float-right {
+    width: clamp(105px, 11vw, 180px);
+    right: 15%;
+    top: 29%;
+    animation: robotFloatRight 5.2s ease-in-out infinite;
+}
+
+@keyframes robotFloatLeft {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(-2deg); }
+    25% { transform: translate3d(18px, -18px, 0) rotate(2deg); }
+    50% { transform: translate3d(5px, -30px, 0) rotate(4deg); }
+    75% { transform: translate3d(-15px, -12px, 0) rotate(0deg); }
+}
+
+@keyframes robotFloatRight {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(2deg); }
+    25% { transform: translate3d(-16px, -20px, 0) rotate(-2deg); }
+    50% { transform: translate3d(-4px, -34px, 0) rotate(-4deg); }
+    75% { transform: translate3d(18px, -13px, 0) rotate(0deg); }
+}
+
+.login-card {
+    position: absolute;
+    z-index: 10;
+    left: 50%;
+    top: 54.5%;
+    transform: translate(-50%, -50%);
+    width: min(31vw, 520px);
+    min-width: 430px;
+    padding: 38px 44px 28px;
+    color: var(--text);
+    text-align: center;
+    background: linear-gradient(180deg, rgba(13, 8, 52, .98), rgba(15, 9, 49, .98));
+    border: 3px solid #ff69d0;
+    box-shadow:
+        0 0 0 4px rgba(101, 49, 183, .65),
+        0 0 28px rgba(255, 84, 211, .58),
+        0 18px 45px rgba(13, 4, 47, .55);
+}
+
+.login-card::before,
+.login-card::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #171044;
+    border: 3px solid #ff69d0;
+}
+.login-card::before { left: -3px; top: -3px; box-shadow: 6px 6px 0 #9d54ff; }
+.login-card::after { right: -3px; top: -3px; box-shadow: -6px 6px 0 #9d54ff; }
+
+.card-robot {
+    position: absolute;
+    width: 76px;
+    height: 38px;
+    left: 50%;
+    top: -30px;
+    transform: translateX(-50%);
+    background: #a9a4ff;
+    border: 4px solid #e9dcff;
+    box-shadow: inset 0 -7px 0 #7771d7, 0 0 0 4px #8e52e8;
+}
+.card-robot::before {
+    content: '';
+    position: absolute;
+    width: 7px;
+    height: 9px;
+    background: #62edff;
+    left: 18px;
+    top: 12px;
+    box-shadow: 30px 0 0 #62edff;
+}
+.card-robot::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 8px;
+    background: #8e52e8;
+    left: 32px;
+    top: -11px;
+}
+
+.login-heading {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(20px, 2vw, 32px);
+    line-height: 1.35;
+    color: #fff7ff;
+    text-shadow: 3px 3px 0 #8e43db, 0 0 12px #ff75dd;
+    margin: 5px 0 12px;
+}
+.login-subtitle {
+    margin: 0 0 22px;
+    color: #e0d9f5;
+    font-size: 21px;
+    line-height: 1.1;
+}
+
+.pixel-form { display: grid; gap: 11px; }
+.pixel-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 55px;
+    padding: 0 46px 0 54px;
+    background: #0d0a32;
+    border: 2px solid #7044b8;
+    box-shadow: inset 0 0 0 2px #18104a;
+    text-align: left;
+}
+.pixel-input:focus-within {
+    border-color: #e36bdd;
+    box-shadow: 0 0 12px rgba(224, 93, 215, .3), inset 0 0 0 2px #281560;
+}
+.pixel-input input,
+.pixel-input select {
+    width: 100%; height: 100%; border: 0; outline: 0; margin: 0; padding: 0;
+    background: transparent; color: #d9d1ff; font-family: 'VT323', monospace; font-size: 23px;
+}
+.pixel-input input::placeholder { color: #c8c0e9; opacity: 1; }
+.pixel-input select { appearance: none; cursor: pointer; }
+.pixel-input select option { color: #eeeaff; background: #151044; }
+
+.field-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #ff68ca; }
+.user-icon { width: 16px; height: 16px; border-radius: 50%; border: 3px solid #ff68ca; }
+.user-icon::after { content: ''; position: absolute; width: 24px; height: 11px; left: -7px; top: 13px; border: 3px solid #ff68ca; border-bottom: 0; border-radius: 12px 12px 0 0; }
+.hash-icon { font-family: 'Press Start 2P', monospace; font-size: 20px; font-weight: 900; }
+.school-icon { width: 21px; height: 14px; border: 3px solid #ff68ca; border-top: 0; }
+.school-icon::before { content: ''; position: absolute; left: -4px; top: -8px; width: 17px; height: 8px; border: 3px solid #ff68ca; transform: skew(-28deg); }
+.school-icon::after { content: ''; position: absolute; left: 5px; top: 5px; width: 4px; height: 9px; background: #ff68ca; }
+.lock-icon { width: 17px; height: 14px; border: 3px solid #ff68ca; top: 56%; }
+.lock-icon::before { content: ''; position: absolute; width: 9px; height: 10px; left: 1px; top: -11px; border: 3px solid #ff68ca; border-bottom: 0; border-radius: 8px 8px 0 0; }
+
+.chevron { position: absolute; right: 18px; width: 10px; height: 10px; border-right: 3px solid #ff68ca; border-bottom: 3px solid #ff68ca; transform: rotate(45deg) translateY(-4px); }
+.eye-button { position: absolute; right: 15px; width: 25px; height: 15px; border: 2px solid #ff68ca; border-radius: 70% 30%; background: transparent; transform: rotate(-45deg); cursor: pointer; }
+.eye-button::after { content: ''; position: absolute; width: 5px; height: 5px; background: #ff68ca; border-radius: 50%; left: 8px; top: 3px; }
+.eye-button.visible { opacity: .55; }
+
+.login-button {
+    height: 58px; border: 3px solid #ffb2eb; background: linear-gradient(#ff73cf, #ed4db9); color: white;
+    font-family: 'Press Start 2P', monospace; font-size: 17px; cursor: pointer; text-shadow: 2px 2px 0 #a92d83;
+    box-shadow: 0 5px 0 #8e3283, 0 0 18px rgba(255, 78, 207, .45);
+}
+.login-button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.login-button:active { transform: translateY(3px); box-shadow: 0 2px 0 #8e3283; }
+.double-arrow { font-size: 25px; margin-left: 9px; }
+
+.create-account { border: 0; background: transparent; color: #d9d1ef; font: 20px 'VT323', monospace; cursor: pointer; margin-top: 17px; }
+.create-account span { color: #ff72d1; }
+.create-account:hover span { text-decoration: underline; }
+.login-validation { color: #ffb6df; font: 17px 'VT323', monospace; margin-bottom: 10px; }
+.login-validation ul { list-style: none; padding: 0; margin: 0; }
+
+.account-modal { position: fixed; inset: 0; z-index: 50; display: none; place-items: center; background: rgba(8,4,35,.72); backdrop-filter: blur(3px); }
+.account-modal.open { display: grid; }
+.account-modal-card { position: relative; width: min(430px,90vw); padding: 35px; background: #120c3d; border: 3px solid #ff6bd2; box-shadow: 0 0 30px rgba(255,88,213,.5); color: #fff; text-align: center; }
+.modal-title { font: 20px 'Press Start 2P', monospace; color: #ff83d8; line-height: 1.5; }
+.account-modal-card p { font-size: 22px; line-height: 1.15; color: #d9d2ee; }
+.modal-close { position: absolute; right: 12px; top: 8px; border: 0; background: transparent; color: #ff82d8; font-size: 30px; cursor: pointer; }
+.modal-button { display: inline-block; padding: 12px 18px; border: 2px solid #ff9ae2; background: #e953bd; color: white; text-decoration: none; font: 12px 'Press Start 2P', monospace; }
+
+@media (max-width: 900px) {
+    .login-world { min-height: 600px; }
+    .login-card { min-width: 0; width: min(520px,82vw); top: 55%; padding: 34px 30px 25px; }
+    }
+@media (max-width: 600px) {
+    body { overflow-y: auto; }
+    .login-world { min-height: 720px; height: 100vh; }
+    .scene-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url('/images/ai-classroom-login-bg.png');
+    background-position: center center;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    transform: none;
+    filter: saturate(1.03) contrast(1.035);
+    will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scene-bg, .shooting-star, .breeze-leaf, .pixel-mote, .floating-robot { animation: none !important; }
+}
+
+
+/* ============================================================
+   STUDENT LOGIN CARD — MATCHES THE "WHO IS IT?" CARD
+   ============================================================ */
+.login-card {
+    position: absolute;
+    z-index: 10;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(600px, 90vw);
+    min-width: 0;
+    padding: 42px 46px 34px;
+    text-align: center;
+    color: #fff7ff;
+    background: linear-gradient(180deg, rgba(16, 10, 47, .985), rgba(10, 7, 31, .985));
+    border: 3px solid #ff68d1;
+    box-shadow:
+        0 0 0 4px rgba(101, 49, 183, .70),
+        0 0 30px rgba(255, 84, 211, .28),
+        0 22px 60px rgba(0, 0, 0, .45);
+}
+
+.login-card::before,
+.login-card::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    top: -3px;
+    background: #171044;
+    border: 3px solid #ff68d1;
+}
+
+.login-card::before {
+    left: -3px;
+    box-shadow: 6px 6px 0 #8e52e8;
+}
+
+.login-card::after {
+    right: -3px;
+    box-shadow: -6px 6px 0 #8e52e8;
+}
+
+/* The previous decorative robot above the student card is intentionally hidden. */
+.card-robot {
+    display: none !important;
+}
+
+.login-eyebrow {
+    color: #ff9be5;
+    font: 10px 'Press Start 2P', monospace;
+    letter-spacing: .06em;
+    text-shadow: 2px 2px 0 #6e35b9;
+    margin: 0;
+}
+
+.login-heading {
+    margin: 16px 0 12px;
+    color: #fff7ff;
+    font: clamp(22px, 3vw, 32px)/1.35 'Press Start 2P', monospace;
+    text-shadow: 3px 3px 0 #8e43db, 0 0 12px #ff75dd;
+}
+
+.login-subtitle {
+    margin: 0 0 25px;
+    color: #e0d9f5;
+    font-size: 23px;
+    line-height: 1.05;
+}
+
+.pixel-form {
+    display: grid;
+    gap: 12px;
+    text-align: left;
+}
+
+.pixel-input {
+    height: 53px;
+}
+
+.login-button {
+    height: 58px;
+    margin-top: 2px;
+}
+
+/* No account creation link on the student page. */
+.create-account,
+.account-modal {
+    display: none !important;
+}
+
+.role-back-link {
+    display: inline-block;
+    margin-top: 16px;
+    color: #ff9be5;
+    font: 19px 'VT323', monospace;
+    text-decoration: none;
+}
+
+.role-back-link:hover {
+    color: #ffffff;
+}
+
+@media (max-width: 650px) {
+    .login-card {
+        width: 92vw;
+        padding: 34px 22px 26px;
+    }
+
+    .login-heading {
+        font-size: 22px;
+    }
+}

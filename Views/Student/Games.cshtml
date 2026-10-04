@@ -1,0 +1,104 @@
+@model List<AIClassroom.Models.Game>
+@{
+    ViewData["Title"] = "Games";
+    var group = Model.FirstOrDefault()?.GroupName ?? "A";
+    var groupATitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+        "AI or Not AI","Pattern Detective","Robot Trainer","Sensor Hunt","Classification Game",
+        "Chatbot Challenge","Algorithm Maze","Flowchart Builder","AI Creator","Recommendation Detective"
+    };
+    var groupBTitles = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+        "ML Trainer","Dataset Detective","Classification Lab","Accuracy Challenge","Bias Detective",
+        "NLP Challenge","Sentiment Challenge","Prompt Battle","AI Model Builder","AI Problem Solver"
+    };
+    var iconByType = new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase) {
+        ["classification"]="classification.svg",["pattern"]="pattern.svg",["sequence"]="robot.svg",
+        ["matching"]="sensor.svg",["logic"]="chatbot.svg",["maze"]="maze.svg",["flowchart"]="flowchart.svg",
+        ["creative"]="creator.svg",["data"]="data.svg",["training"]="trainer.svg",["accuracy"]="accuracy.svg",
+        ["ethics"]="bias.svg",["nlp"]="nlp.svg",["sentiment"]="sentiment.svg",["prompt"]="prompt.svg",
+        ["model"]="model.svg",["problem"]="problem.svg"
+    };
+    var selectedTitles = group.Equals("B",StringComparison.OrdinalIgnoreCase) ? groupBTitles : groupATitles;
+    var games = Model.Where(x => selectedTitles.Contains(x.Name)).OrderBy(x => x.Id).ToList();
+}
+
+<section class="arcade-page">
+    <header class="arcade-header">
+        <a class="arcade-brand" asp-controller="Student" asp-action="Index">
+            <span class="arcade-ai">AI</span><span class="arcade-classroom">QUEST</span>
+        </a>
+        <nav class="arcade-nav">
+            <a asp-controller="Student" asp-action="Index">Home</a>
+            <a asp-controller="Curriculum" asp-action="Index">Learn</a>
+            <a class="active" asp-controller="Student" asp-action="Games">Games</a>
+            <a asp-controller="Student" asp-action="Quizzes">Quizzes</a>
+        </nav>
+        <div class="arcade-user">GROUP @group</div>
+    </header>
+
+    <main class="arcade-main">
+        <section class="arcade-hero">
+            <div>
+                <div class="arcade-eyebrow">AI PLAY LAB</div>
+                <h1>Play. Learn. <span>Level Up.</span></h1>
+                <p>Every game is a learning mission. Earn XP, improve your score, unlock badges and climb your class ranking.</p>
+            </div>
+            <div class="arcade-hero-robot"><img src="~/images/robot-left-float.png" alt="Robo"></div>
+        </section>
+
+        <section class="game-stats">
+            <div><span>XP</span><strong>@(ViewBag.TotalXp ?? 0)</strong></div>
+            <div><span>GAME POINTS</span><strong>@(ViewBag.GamePoints ?? 0)</strong></div>
+            <div><span>GAMES PLAYED</span><strong>@(ViewBag.GamesPlayed ?? 0)</strong></div>
+            <div><span>BADGES</span><strong>@(ViewBag.BadgesCount ?? 0)</strong></div>
+        </section>
+
+        <section class="game-section">
+            <div class="section-heading">
+                <div>
+                    <div class="arcade-eyebrow">YOUR CURRICULUM</div>
+                    <h2>Group @group Game Missions</h2>
+                    <p>Choose a mission and put what you learned into practice.</p>
+                </div>
+                <div class="game-count">@games.Count MISSIONS</div>
+            </div>
+
+            <div class="game-grid-new">
+                @foreach (var g in games)
+                {
+                    var icon = iconByType.TryGetValue(g.GameType, out var file) ? file : "classification.svg";
+                    <article class="game-card-new">
+                        <div class="game-card-art"><img src="~/images/games/@icon" alt=""></div>
+                        <div class="game-card-body">
+                            <span class="game-type">@g.GameType.ToUpperInvariant()</span>
+                            <h3>@g.Name</h3>
+                            <p>@g.Description</p>
+                            <div class="game-card-footer">
+                                <strong>+@g.BaseXp XP</strong>
+                                <a asp-action="Game" asp-route-id="@g.Id">PLAY <span>→</span></a>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+
+        <section class="xp-rules">
+            <div class="section-heading">
+                <div>
+                    <div class="arcade-eyebrow">REWARD SYSTEM</div>
+                    <h2>Earn XP while you learn</h2>
+                    <p>Good progress should feel rewarding. Every learning activity contributes to your profile.</p>
+                </div>
+            </div>
+            <div class="reward-grid">
+                <div><span class="reward-icon lesson"></span><strong>Lesson completed</strong><b>+50 XP</b></div>
+                <div><span class="reward-icon quiz"></span><strong>Quiz correct</strong><b>+10 XP</b></div>
+                <div><span class="reward-icon game"></span><strong>Game completed</strong><b>+50 XP</b></div>
+                <div><span class="reward-icon perfect"></span><strong>Perfect game</strong><b>+100 XP</b></div>
+                <div><span class="reward-icon test"></span><strong>Test completed</strong><b>+100 XP</b></div>
+                <div><span class="reward-icon assignment"></span><strong>Assignment completed</strong><b>+50 XP</b></div>
+                <div><span class="reward-icon participation"></span><strong>Participation</strong><b>+10 XP</b></div>
+            </div>
+        </section>
+    </main>
+</section>

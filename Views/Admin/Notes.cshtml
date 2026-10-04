@@ -1,0 +1,2 @@
+@model List<AIClassroom.Models.TeacherNote>
+@{ViewData["Title"]="Teacher Notes";}<div class="page-title"><div><div class="eyebrow">TEACHER CONTENT</div><h1>📝 Notes</h1></div><a class="big-btn primary" asp-action="AddNote">+ Add Note</a></div><div class="note-grid">@foreach(var n in Model){<article class="note pixel"><h2>@n.Title</h2><p>@n.Content</p></article>}</div>

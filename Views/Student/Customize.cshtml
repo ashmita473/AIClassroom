@@ -1,0 +1,178 @@
+@model AIClassroom.Models.CharacterCustomizeViewModel
+@{
+    ViewData["Title"] = "Customize Your Character";
+    var categories = new[] { "Saved", "Skin", "Hair", "HairColor", "Outfit", "Hat", "Accessory", "Shoes", "Pet" };
+    var active = Context.Request.Query["category"].ToString();
+    if (string.IsNullOrWhiteSpace(active)) active = "Saved";
+    string Style(int? id) => Model.Items.FirstOrDefault(x => x.Id == id)?.StyleKey ?? "";
+    string Name(int? id) => Model.Items.FirstOrDefault(x => x.Id == id)?.Name ?? "None";
+    var activeItems = active == "Saved"
+        ? Model.Items.Where(x => x.IsDefault).ToList()
+        : Model.Items.Where(x => x.Category == active).ToList();
+    var selectedBase = Model.Character.BodyType == "Girl"
+        ? Url.Content("~/images/character/base-girl-reference.png")
+        : Url.Content("~/images/character/base-boy-reference-proportions.png");
+}
+<section class="reference-editor">
+    <div class="editor-top">
+        <div>
+            <div class="editor-kicker">AI QUEST / CHARACTER STUDIO</div>
+            <h1>Customize Your Character</h1>
+        </div>
+        <div class="editor-xp">XP <strong>@Model.Student.XpBalance</strong></div>
+    </div>
+
+    @if (TempData["CharacterMessage"] is string msg)
+    {
+        <div class="editor-message">@msg</div>
+    }
+
+    <div class="editor-main">
+        <aside class="color-rail" aria-label="Colors">
+            <button class="tool-circle pipette" type="button" title="Color picker"></button>
+            <button class="color-dot color-black" type="button" data-color="#22202a"></button>
+            <button class="color-dot color-yellow" type="button" data-color="#ffe45c"></button>
+            <button class="color-dot color-gold" type="button" data-color="#f7bd43"></button>
+            <button class="color-dot color-orange" type="button" data-color="#df7d2d"></button>
+            <button class="color-dot color-red" type="button" data-color="#cf4b28"></button>
+            <button class="color-dot color-pink" type="button" data-color="#ed6eae"></button>
+        </aside>
+
+        <section class="character-stage">
+            <div class="stage-toolbar">
+                <span>PREVIEW</span>
+                <span>@Model.Character.BodyType</span>
+            </div>
+
+            <div class="character-canvas" id="characterCanvas">
+                <div class="platform"></div>
+                <img id="characterBase" class="character-base" src="@selectedBase" alt="Chibi character preview" />
+                <div class="selected-label" id="selectedLabel">REFERENCE BASE</div>
+            </div>
+
+            <div class="body-switch">
+                <form method="post" asp-action="Customize">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="category" value="Body" />
+                    <button name="bodyType" value="Girl" class="body-button @(Model.Character.BodyType=="Girl"?"active":"")">GIRL</button>
+                    <button name="bodyType" value="Boy" class="body-button @(Model.Character.BodyType=="Boy"?"active":"")">BOY</button>
+                </form>
+            </div>
+        </section>
+
+        <aside class="editor-tools">
+            <button class="camera-tool" id="cameraButton" type="button" title="Save a snapshot">
+                <span class="camera-icon"></span>
+            </button>
+            <button class="menu-tool" id="menuButton" type="button">MENU</button>
+            <button class="side-tool active" type="button" data-category="Hair">HAIR</button>
+            <button class="side-tool" type="button" data-category="Outfit">OUTFIT</button>
+            <button class="side-tool" type="button" data-category="Accessory">TOOLS</button>
+            <button class="side-tool" type="button" id="undoButton">UNDO</button>
+        </aside>
+    </div>
+
+    <section class="editor-drawer">
+        <nav class="category-tabs" aria-label="Character categories">
+            @foreach (var category in categories)
+            {
+                <button class="category-tab @(active == category ? "active" : "")" type="button" data-category="@category">
+                    <span class="tab-icon">@category.Substring(0,1)</span>
+                    <span>@category</span>
+                </button>
+            }
+        </nav>
+
+        <div class="drawer-head">
+            <div>
+                <strong id="drawerTitle">@active</strong>
+                <span id="drawerHint">Choose an item to preview or unlock.</span>
+            </div>
+            <a asp-action="Index" class="back-dashboard">BACK TO DASHBOARD</a>
+        </div>
+
+        <div class="item-strip" id="itemStrip">
+            @foreach (var item in activeItems)
+            {
+                var unlocked = Model.UnlockedItemIds.Contains(item.Id);
+                var equipped =
+                    (item.Category == "Skin" && Model.Character.SkinToneItemId == item.Id) ||
+                    (item.Category == "Hair" && Model.Character.HairItemId == item.Id) ||
+                    (item.Category == "HairColor" && Model.Character.HairColorItemId == item.Id) ||
+                    (item.Category == "Outfit" && Model.Character.OutfitItemId == item.Id) ||
+                    (item.Category == "Hat" && Model.Character.HatItemId == item.Id) ||
+                    (item.Category == "Accessory" && Model.Character.AccessoryItemId == item.Id) ||
+                    (item.Category == "Shoes" && Model.Character.ShoesItemId == item.Id) ||
+                    (item.Category == "Pet" && Model.Character.PetItemId == item.Id);
+
+                <form method="post" asp-action="Customize" class="saved-character-card @(equipped ? "equipped" : "") @(unlocked ? "owned" : "locked")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="category" value="@item.Category" />
+                    <input type="hidden" name="itemId" value="@item.Id" />
+                    <button class="character-thumb" type="submit" title="@item.Name">
+                        <img src="@Url.Content("~/images/character/saved-" + (((item.Id - 1) % 6) + 1) + ".png")" alt="@item.Name" />
+                        @if (!unlocked && item.Cost > 0)
+                        {
+                            <span class="lock-badge">@item.Cost XP</span>
+                        }
+                        else if (equipped)
+                        {
+                            <span class="check-badge">✓</span>
+                        }
+                    </button>
+                    <span class="item-name">@item.Name</span>
+                </form>
+            }
+        </div>
+    </section>
+</section>
+
+@section Scripts {
+<script>
+(() => {
+    const tabs = document.querySelectorAll('.category-tab');
+    const sideTools = document.querySelectorAll('.side-tool[data-category]');
+    const title = document.getElementById('drawerTitle');
+    const hint = document.getElementById('drawerHint');
+    const labels = {
+        Saved: 'Your starter and saved looks.',
+        Skin: 'Choose a skin tone.',
+        Hair: 'Choose a hairstyle.',
+        HairColor: 'Choose a hair color.',
+        Outfit: 'Choose an outfit.',
+        Hat: 'Choose a hat.',
+        Accessory: 'Choose accessories.',
+        Shoes: 'Choose shoes.',
+        Pet: 'Choose a companion.'
+    };
+
+    function go(category) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('category', category);
+        window.location.href = url.toString();
+    }
+
+    tabs.forEach(t => t.addEventListener('click', () => go(t.dataset.category)));
+    sideTools.forEach(t => t.addEventListener('click', () => go(t.dataset.category)));
+
+    document.getElementById('cameraButton')?.addEventListener('click', () => {
+        window.print();
+    });
+
+    document.getElementById('menuButton')?.addEventListener('click', () => {
+        document.querySelector('.editor-drawer')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    document.querySelectorAll('.color-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+            document.documentElement.style.setProperty('--selected-color', dot.dataset.color);
+            document.querySelectorAll('.color-dot').forEach(x => x.classList.remove('selected'));
+            dot.classList.add('selected');
+        });
+    });
+
+    if (title) title.textContent = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(active));
+    if (hint) hint.textContent = labels[@Html.Raw(System.Text.Json.JsonSerializer.Serialize(active))] || labels.Saved;
+})();
+</script>
+}

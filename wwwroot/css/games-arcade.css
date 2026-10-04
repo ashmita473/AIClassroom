@@ -1,0 +1,452 @@
+
+/* =========================================================
+   AI QUEST — GAMES ARCADE
+   Screenshot-matched visual system:
+   deep space / neon blue / purple / yellow,
+   rounded game UI, glowing active navigation and mission cards.
+   ========================================================= */
+
+.arcade-page,.game-mission-page{
+  min-height:100vh;
+  color:#fff;
+  background:
+    radial-gradient(circle at 4% 48%,rgba(57,139,255,.42),transparent 16%),
+    radial-gradient(circle at 96% 20%,rgba(145,65,255,.38),transparent 18%),
+    radial-gradient(circle at 50% 100%,rgba(89,50,201,.34),transparent 34%),
+    linear-gradient(180deg,#071747 0%,#081956 47%,#07133f 100%);
+  position:relative;
+  overflow:hidden;
+}
+.arcade-page:before,.game-mission-page:before{
+  content:"";
+  position:absolute;inset:0;pointer-events:none;opacity:.55;
+  background-image:
+    radial-gradient(circle at 7% 11%,#fff 0 2px,transparent 3px),
+    radial-gradient(circle at 21% 18%,#67eaff 0 1.5px,transparent 3px),
+    radial-gradient(circle at 32% 7%,#ffd45b 0 2px,transparent 3px),
+    radial-gradient(circle at 53% 16%,#fff 0 1.5px,transparent 3px),
+    radial-gradient(circle at 71% 10%,#ffd45b 0 2px,transparent 3px),
+    radial-gradient(circle at 91% 27%,#69eaff 0 2px,transparent 3px),
+    radial-gradient(circle at 15% 75%,#fff 0 1.5px,transparent 3px),
+    radial-gradient(circle at 82% 78%,#ffd45b 0 2px,transparent 3px);
+}
+.arcade-page:after,.game-mission-page:after{
+  content:"";
+  position:absolute;
+  width:210px;height:210px;
+  right:-80px;top:35px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#a579ff,#5732bc 55%,#24106e);
+  box-shadow:inset -30px -20px 50px #160b51,0 0 45px #794bff55;
+  opacity:.85;
+  pointer-events:none;
+}
+
+.arcade-header{
+  height:82px;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:20px;
+  padding:0 clamp(28px,6vw,100px);
+  background:rgba(4,16,54,.78);
+  border-bottom:1px solid rgba(69,104,197,.34);
+  backdrop-filter:blur(16px);
+  position:relative;
+  z-index:10;
+}
+.arcade-brand{
+  display:flex;align-items:center;gap:9px;text-decoration:none;
+  font-family:"Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  font-weight:950;font-size:1.65rem;letter-spacing:-.035em;
+}
+.arcade-brand:before{
+  content:"🚀";font-size:2rem;filter:drop-shadow(0 0 9px #68dfff);
+}
+.arcade-ai{
+  background:linear-gradient(135deg,#59eaff,#4baeff,#7192ff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.arcade-classroom{
+  background:linear-gradient(135deg,#fff47b,#ffd34d,#ff8abc,#ad7cff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.arcade-nav{display:flex;gap:12px;align-items:center}
+.arcade-nav a{
+  display:flex;align-items:center;gap:9px;
+  color:#dbe6ff;text-decoration:none;
+  padding:13px 25px;border-radius:32px;
+  background:rgba(19,44,103,.68);
+  border:1px solid rgba(70,103,190,.18);
+  font-size:1rem;font-weight:900;
+  transition:.2s;
+}
+.arcade-nav a:nth-child(1):before{content:"⌂";font-size:1.45rem;color:#61dfff}
+.arcade-nav a:nth-child(2):before{content:"▣";font-size:1.3rem;color:#72caff}
+.arcade-nav a:nth-child(3):before{content:"🎮";font-size:1.15rem}
+.arcade-nav a:nth-child(4):before{content:"♛";font-size:1.25rem;color:#ffd35a}
+.arcade-nav a:hover{transform:translateY(-2px);background:#1a3b88}
+.arcade-nav a.active{
+  color:#fff;
+  background:linear-gradient(135deg,#7040ee,#a548ff 55%,#376fff);
+  border:1px solid #9e8cff;
+  box-shadow:0 0 0 2px #5b6cff33,0 0 26px #8b4fff99,inset 0 0 18px #fff2;
+}
+.arcade-user{
+  justify-self:end;
+  display:flex;align-items:center;gap:10px;
+  color:#f2f5ff;font-weight:900;font-size:.95rem;
+}
+.arcade-user:before{
+  content:"AI";display:grid;place-items:center;
+  width:43px;height:43px;border-radius:50%;
+  background:linear-gradient(145deg,#ffe2c2,#ffb57e);
+  border:3px solid #fff;
+  color:#73417e;font-weight:950;
+  box-shadow:0 4px 16px #0005;
+}
+.arcade-user:after{content:"⌄";color:#b8c8ef;font-size:1.3rem}
+
+.arcade-main{
+  width:min(1470px,calc(100% - 56px));
+  margin:auto;
+  padding:22px 0 70px;
+  position:relative;z-index:2;
+}
+.arcade-hero{
+  min-height:275px;
+  border-radius:28px;
+  padding:35px 38px;
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;
+  border:1px solid #3560bf;
+  background:
+    radial-gradient(circle at 76% 76%,rgba(93,48,197,.85),transparent 30%),
+    radial-gradient(circle at 95% 55%,rgba(55,108,232,.7),transparent 25%),
+    linear-gradient(135deg,#102d72,#0b1f59 55%,#162c71);
+  box-shadow:0 18px 50px #020a2d70;
+}
+.arcade-hero:before{
+  content:"";
+  position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 60% 23%,#fff 0 2px,transparent 3px),
+    radial-gradient(circle at 72% 12%,#ffd45b 0 2px,transparent 3px),
+    radial-gradient(circle at 81% 35%,#6deaff 0 2px,transparent 3px),
+    radial-gradient(circle at 54% 65%,#ffd45b 0 1.5px,transparent 3px);
+  opacity:.8;
+}
+.arcade-eyebrow{
+  font-size:.76rem;letter-spacing:.16em;font-weight:950;color:#62e8ff;
+}
+.arcade-hero h1{
+  font-family:"Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  font-size:clamp(2.8rem,5.2vw,4.7rem);
+  line-height:.98;letter-spacing:-.035em;
+  margin:10px 0 16px;position:relative;z-index:2;
+}
+.arcade-hero h1 span{
+  color:#ffd95d;
+  text-shadow:0 5px 15px #ffbb3a33;
+}
+.arcade-hero p{
+  max-width:710px;margin:0;
+  color:#c1d5ff;font-size:1.1rem;line-height:1.48;
+  position:relative;z-index:2;
+}
+.arcade-hero-robot{
+  margin-left:auto;width:390px;height:270px;
+  position:relative;z-index:3;display:grid;place-items:end center;
+}
+.arcade-hero-robot:before{
+  content:"";position:absolute;width:250px;height:95px;bottom:5px;
+  background:#8a54ff55;border-radius:50%;filter:blur(20px);
+}
+.arcade-hero-robot img{
+  width:100%;height:100%;object-fit:contain;
+  filter:drop-shadow(0 20px 15px #0008);
+  animation:arcadeRobot 4s ease-in-out infinite;
+}
+@keyframes arcadeRobot{50%{transform:translateY(-10px) rotate(1.5deg)}}
+
+.game-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:15px;margin:18px 0 25px;
+}
+.game-stats>div{
+  min-height:82px;padding:13px 22px;
+  border-radius:20px;
+  background:linear-gradient(145deg,#112a69,#0c2055);
+  border:1px solid #3156a8;
+  box-shadow:0 9px 28px #020a2d44;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.game-stats>div:before{
+  content:"";position:absolute;left:-20px;top:50%;
+  width:78px;height:78px;transform:translateY(-50%);
+  border-radius:50%;background:#6d5dff33;filter:blur(4px);
+}
+.game-stats>div:nth-child(1):before{background:#ffd14e55}
+.game-stats>div:nth-child(2):before{background:#a65cff55}
+.game-stats>div:nth-child(3):before{background:#51db9955}
+.game-stats>div:nth-child(4):before{background:#45c8ff55}
+.game-stats span{font-size:.69rem;color:#79b8ff;font-weight:950;letter-spacing:.12em;margin-left:68px}
+.game-stats strong{font-size:1.55rem;color:#fff;margin-left:68px}
+
+.section-heading{
+  display:flex;align-items:end;justify-content:space-between;
+  gap:20px;margin-bottom:16px;
+}
+.section-heading h2{
+  font-family:"Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  font-size:2.1rem;margin:4px 0 3px;letter-spacing:-.02em;
+}
+.section-heading p{margin:0;color:#9eb8e9}
+.game-count{
+  background:#173a85;border:1px solid #4269c2;color:#fff;
+  padding:12px 18px;border-radius:25px;font-weight:950;
+}
+.game-count:after{content:"⌄";margin-left:18px;color:#8bb9ff}
+
+.game-grid-new{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.game-card-new{
+  min-height:270px;border-radius:24px;
+  background:linear-gradient(180deg,#173a86 0%,#0d245b 72%);
+  border:1px solid #3d66bd;
+  box-shadow:0 15px 35px #020a2f5c;
+  overflow:hidden;display:flex;flex-direction:column;
+  transition:.2s;position:relative;
+}
+.game-card-new:hover{
+  transform:translateY(-5px);
+  border-color:#6d9fff;
+  box-shadow:0 22px 45px #020a2f85,0 0 20px #4b7fff22;
+}
+.game-card-art{
+  height:175px;position:relative;overflow:hidden;
+  display:grid;place-items:center;
+  background:
+    radial-gradient(circle at 80% 20%,#ffffff33 0 2px,transparent 3px),
+    radial-gradient(circle at 66% 43%,#ffd45c 0 2px,transparent 3px),
+    radial-gradient(circle at 20% 30%,#fff 0 1.5px,transparent 3px),
+    linear-gradient(135deg,#1a5bc0,#4b42b5 52%,#a43fbb);
+}
+.game-card-new:nth-child(3n+2) .game-card-art{
+  background:
+    radial-gradient(circle at 73% 18%,#ffd45c 0 3px,transparent 4px),
+    linear-gradient(145deg,#7c3cce,#4033a4 55%,#1c65c9);
+}
+.game-card-new:nth-child(3n) .game-card-art{
+  background:
+    radial-gradient(circle at 76% 20%,#fff 0 2px,transparent 3px),
+    linear-gradient(145deg,#1e75d6,#3267c6 48%,#47a4d8);
+}
+.game-card-art:after{
+  content:"";position:absolute;left:-10%;right:-10%;bottom:-48px;
+  height:90px;background:#0b1e54;border-radius:50% 50% 0 0;
+  box-shadow:0 -20px 40px #6e62ff44;
+}
+.game-card-art img{
+  width:155px;height:135px;object-fit:contain;
+  position:relative;z-index:2;filter:drop-shadow(0 12px 12px #0005);
+}
+.game-card-body{
+  padding:13px 19px 15px;display:flex;flex-direction:column;flex:1;
+  position:relative;z-index:3;
+}
+.game-type{
+  display:inline-flex;width:max-content;
+  padding:5px 13px;border-radius:20px;
+  background:#56d7ff;color:#07316d;
+  font-size:.62rem;font-weight:950;letter-spacing:.07em;
+}
+.game-card-body h3{
+  font-family:"Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  font-size:1.22rem;margin:8px 0 4px;
+}
+.game-card-body p{
+  color:#b5c8ed;line-height:1.32;margin:0;min-height:37px;
+  font-size:.9rem;
+}
+.game-card-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:11px;
+}
+.game-card-footer strong{
+  color:#fff;font-size:.95rem;display:flex;align-items:center;gap:7px;
+}
+.game-card-footer strong:before{
+  content:"★";color:#ffd34e;font-size:1.35rem;
+  filter:drop-shadow(0 0 5px #ffd34e);
+}
+.game-card-footer a{
+  background:linear-gradient(180deg,#ffe06b,#ffc54a);
+  color:#14245d;text-decoration:none;
+  padding:10px 20px;border-radius:24px;
+  font-weight:950;font-size:.85rem;
+  box-shadow:0 7px 14px #f5b62e35;
+}
+.game-card-footer a span{margin-left:8px;font-size:1.05rem}
+
+.xp-rules{
+  margin-top:28px;padding:27px;
+  border-radius:27px;
+  background:linear-gradient(145deg,#132e6f,#0d2357);
+  border:1px solid #365db0;
+}
+.reward-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+.reward-grid>div{
+  min-height:90px;padding:13px 15px;border-radius:16px;
+  background:#0a1d4b;border:1px solid #294c99;
+  display:grid;grid-template-columns:36px 1fr;
+  grid-template-rows:1fr auto;column-gap:9px;align-items:center;
+}
+.reward-grid strong{font-size:.82rem}
+.reward-grid b{grid-column:2;color:#ffd65b}
+.reward-icon{
+  width:34px;height:34px;border-radius:11px;
+  background:linear-gradient(145deg,#6fe6ff,#586df2);
+  grid-row:1/3;position:relative;
+}
+.reward-icon:after{
+  content:"★";position:absolute;inset:0;display:grid;place-items:center;
+  color:#fff;font-size:1rem;
+}
+.reward-icon.quiz{background:#8c72f3}.reward-icon.game{background:#ff78b1}
+.reward-icon.perfect{background:#ffd04e}.reward-icon.test{background:#6fd79b}
+.reward-icon.assignment{background:#ff9f63}.reward-icon.participation{background:#62b9ff}
+
+/* Mission detail page */
+.game-mission-page{padding:28px 5% 70px;position:relative}
+.game-mission-page:after{top:70px;right:-45px}
+.mission-back{
+  position:relative;z-index:3;
+  display:inline-flex;align-items:center;gap:10px;
+  color:#61e7ff;text-decoration:none;font-weight:950;font-size:1rem;
+}
+.mission-back:before{content:"←";font-size:1.5rem}
+.mission-shell{
+  width:min(1325px,100%);margin:28px auto 0;
+  display:grid;grid-template-columns:43% 57%;
+  border-radius:32px;overflow:hidden;
+  background:linear-gradient(145deg,#122f72,#0c2256);
+  border:1px solid #3d64b8;
+  box-shadow:0 25px 70px #0007;
+  position:relative;z-index:2;
+}
+.mission-art-large{
+  min-height:540px;margin:38px 20px 38px 38px;
+  border-radius:29px;overflow:hidden;
+  display:grid;place-items:center;
+  background:
+    radial-gradient(circle at 20% 22%,#fff 0 2px,transparent 3px),
+    radial-gradient(circle at 76% 14%,#ffd45c 0 3px,transparent 4px),
+    radial-gradient(circle at 83% 62%,#fff 0 1.5px,transparent 3px),
+    radial-gradient(circle at 10% 80%,#63e8ff 0 2px,transparent 3px),
+    linear-gradient(145deg,#102b69,#152d73 45%,#6a38c4 100%);
+  border:1px solid #3559a9;
+  position:relative;
+}
+.mission-art-large:before{
+  content:"";position:absolute;width:86%;height:30%;bottom:-12%;
+  border-radius:50%;background:linear-gradient(145deg,#7e6aff,#4030a0);
+  box-shadow:0 -20px 50px #8c62ff55;
+}
+.mission-art-large img{
+  width:78%;height:78%;object-fit:contain;
+  position:relative;z-index:2;filter:drop-shadow(0 25px 20px #0007);
+}
+.mission-content{
+  padding:39px 42px 40px 10px;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.mission-content .game-type{
+  background:#55ddff;color:#07336c;
+  border:1px solid #74ebff;
+}
+.mission-content h1{
+  font-family:"Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  font-size:clamp(2.8rem,4vw,4.2rem);
+  line-height:.98;margin:13px 0 14px;
+  letter-spacing:-.035em;
+  background:linear-gradient(90deg,#59e6ff,#fff 46%,#ffd45b 76%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.mission-content>p{
+  color:#bdd0f5;font-size:1.18rem;line-height:1.45;margin:0 0 20px;
+}
+.mission-rewards{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:4px 0 17px;
+}
+.mission-rewards div{
+  min-height:95px;padding:13px 15px;border-radius:16px;
+  background:rgba(7,28,73,.7);border:1px solid #3158a8;
+  box-shadow:inset 0 0 18px #3157a91a;
+}
+.mission-rewards small{
+  display:block;color:#65e5ff;font-size:.62rem;font-weight:950;
+}
+.mission-rewards strong{
+  display:block;margin-top:7px;color:#ffd55c;font-size:.98rem;line-height:1.25;
+}
+.mission-info{
+  display:flex;gap:10px;margin:0 0 22px;flex-wrap:wrap;
+}
+.mission-info span{
+  padding:8px 14px;border-radius:18px;
+  background:#102b6b;border:1px solid #345eb2;
+  color:#c8d8f7;font-size:.76rem;font-weight:950;
+}
+.mission-start{
+  width:max-content;min-width:300px;
+  border:0;border-bottom:5px solid #dc9d25;
+  background:linear-gradient(180deg,#ffe06b,#ffc64a);
+  color:#15255b;border-radius:35px;
+  padding:16px 27px;
+  font-weight:950;font-size:1.2rem;cursor:pointer;
+  box-shadow:0 12px 22px #f3b63235;
+}
+.mission-start span{float:right;margin-left:55px;font-size:1.35rem}
+.mission-note{
+  margin-top:15px!important;
+  padding:14px 16px!important;
+  border-radius:16px;
+  border:1px solid #3158a5;
+  background:#0a1d4a;
+  color:#9fb5df!important;
+  font-size:.84rem!important;
+}
+
+/* Responsive */
+@media(max-width:1150px){
+  .arcade-header{padding:0 25px}
+  .arcade-nav a{padding:12px 16px}
+  .arcade-hero-robot{width:300px}
+  .game-grid-new{grid-template-columns:repeat(2,1fr)}
+  .reward-grid{grid-template-columns:repeat(2,1fr)}
+  .mission-shell{grid-template-columns:1fr}
+  .mission-art-large{min-height:390px;margin:28px}
+  .mission-content{padding:0 35px 35px}
+}
+@media(max-width:800px){
+  .arcade-header{height:auto;padding:14px 18px;grid-template-columns:1fr auto}
+  .arcade-nav{grid-column:1/-1;order:3;overflow:auto;padding-bottom:3px}
+  .arcade-nav a{white-space:nowrap;padding:10px 14px;font-size:.88rem}
+  .arcade-main{width:calc(100% - 28px)}
+  .arcade-hero{min-height:320px;padding:27px}
+  .arcade-hero-robot{position:absolute;right:-35px;bottom:-5px;width:300px;opacity:.45}
+  .game-stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .arcade-brand{font-size:1.22rem}.arcade-brand:before{font-size:1.5rem}
+  .arcade-user{font-size:0}.arcade-user:before{width:40px;height:40px}
+  .arcade-hero h1{font-size:2.65rem}
+  .game-grid-new,.reward-grid,.game-stats{grid-template-columns:1fr}
+  .game-card-art{height:165px}
+  .section-heading{align-items:flex-start;flex-direction:column}
+  .mission-art-large{min-height:285px;margin:18px}
+  .mission-content{padding:0 20px 25px}
+  .mission-content h1{font-size:2.65rem}
+  .mission-rewards{grid-template-columns:1fr}
+  .mission-start{min-width:100%;font-size:1rem}
+}

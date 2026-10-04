@@ -1,0 +1,44 @@
+@model AIClassroom.Models.AdminLoginViewModel
+@{
+    ViewData["Title"] = "Teacher Login";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Classroom — Teacher Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/teacher-login.css" asp-append-version="true" />
+</head>
+<body>
+    <main class="teacher-page">
+        <section class="teacher-card" aria-labelledby="teacher-title">
+            <div class="teacher-eyebrow">TEACHER CONTROL CENTER</div>
+            <h1 id="teacher-title">TEACHER LOGIN</h1>
+            <p class="teacher-subtitle">Enter your teacher credentials</p>
+
+            <div asp-validation-summary="ModelOnly" class="teacher-validation"></div>
+
+            <form method="post" class="teacher-form" autocomplete="on">
+                <div class="teacher-field">
+                    <label asp-for="Username">USERNAME</label>
+                    <input asp-for="Username" autocomplete="username" required />
+                </div>
+
+                <div class="teacher-field">
+                    <label asp-for="Password">PASSWORD</label>
+                    <input asp-for="Password" type="password" autocomplete="current-password" required />
+                </div>
+
+                <button class="teacher-button" type="submit">ENTER CONTROL CENTER <span>»</span></button>
+            </form>
+
+            <a class="teacher-back" asp-controller="Home" asp-action="Index">← Back to “Who is it?”</a>
+        </section>
+    </main>
+</body>
+</html>

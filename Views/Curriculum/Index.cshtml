@@ -1,0 +1,98 @@
+@model List<AIClassroom.Models.CurriculumModule>
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Learn";
+    var first = Model.FirstOrDefault();
+    var classLabel = first == null ? "AI LEARNING WORLD" : $"Class {first.ClassMin}–{first.ClassMax}";
+    var moduleColors = new[] { "blue", "purple", "pink", "mint", "gold", "sky" };
+    var cardColors = new[] { "blue", "lavender", "yellow", "mint", "pink", "sky" };
+    var dayIndex = 0;
+}
+
+<section class="learn-world">
+    <header class="learn-header">
+        <a class="learn-brand" asp-controller="Student" asp-action="Index" aria-label="AI Classroom">
+            <span class="learn-brand-ai">AI</span><span class="learn-brand-name">CLASSROOM</span>
+        </a>
+
+        <nav class="learn-nav">
+            <a asp-controller="Student" asp-action="Index"><span class="nav-icon home-icon"></span>Home</a>
+            <a class="active" asp-controller="Curriculum" asp-action="Index"><span class="nav-icon book-icon"></span>Learn</a>
+            <a asp-controller="Student" asp-action="Games"><span class="nav-icon game-icon"></span>Games</a>
+            <a asp-controller="Student" asp-action="Quizzes"><span class="nav-icon quiz-icon"></span>Quizzes</a>
+        </nav>
+
+        <div class="learn-profile">
+            <span class="learn-avatar">AI</span>
+            <span>@User.Identity?.Name</span>
+            <span class="learn-chevron">⌄</span>
+        </div>
+    </header>
+
+    <section class="learn-hero">
+        <div class="learn-hero-copy">
+            <div class="learn-eyebrow">AI LEARNING WORLD</div>
+            <h1>Explore your <span>missions</span></h1>
+            <p>Complete each mission step by step and become an AI explorer!</p>
+        </div>
+        <div class="learn-hero-art" aria-hidden="true"></div>
+    </section>
+
+    <main class="learn-content">
+        @if (!Model.Any())
+        {
+            <section class="learn-empty">
+                <h2>Your learning world is getting ready!</h2>
+                <p>Your teacher hasn't published any missions for your class yet.</p>
+            </section>
+        }
+
+        @foreach (var module in Model)
+        {
+            var moduleIndex = Model.IndexOf(module);
+            var moduleColor = moduleColors[moduleIndex % moduleColors.Length];
+            var days = module.Days.OrderBy(x => x.DayNumber).ToList();
+
+            <section class="learn-module @moduleColor">
+                <div class="learn-module-head">
+                    <div class="module-title-wrap">
+                        <span class="module-code">@module.Code</span>
+                        <div>
+                            <h2>@module.Title</h2>
+                            <p>Class @module.ClassMin–@module.ClassMax</p>
+                        </div>
+                    </div>
+                    <div class="module-stars" aria-label="Module progress">
+                        <span>★</span><span>★</span>
+                    </div>
+                </div>
+
+                <div class="learn-day-grid">
+                    @foreach (var day in days)
+                    {
+                        var color = cardColors[dayIndex % cardColors.Length];
+                        var currentDayIndex = dayIndex++;
+                        <a class="learn-day-card @color @(day.IsLocked ? "is-locked" : "")"
+                           asp-controller="Curriculum" asp-action="Day" asp-route-id="@day.Id">
+                            <div class="day-card-copy">
+                                <span class="day-pill">LESSON @day.DayNumber</span>
+                                <h3>@day.Title</h3>
+                                <p>@day.ContentSummary</p>
+                                <span class="day-arrow">→</span>
+                            </div>
+                            <div class="day-art art-@((currentDayIndex % 6) + 1)" aria-hidden="true">
+                                <span class="art-orb"></span>
+                                <span class="art-shape"></span>
+                                <span class="art-shape small"></span>
+                            </div>
+                            @if (day.IsLocked)
+                            {
+                                <span class="locked-ribbon">LOCKED</span>
+                            }
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+    </main>
+</section>

@@ -1,0 +1,4 @@
+@model List<AIClassroom.Models.Test>
+@{ViewData["Title"]="Tests";}
+<div class="page-title"><div><div class="eyebrow">ASSESSMENT LAB</div><h1>Tests</h1><p class="muted">Unit, module, revision and final assessments.</p></div><a class="big-btn primary" asp-action="AddTest">+ Add Test</a></div>
+<div class="quiz-list">@foreach(var t in Model){<article class="panel pixel"><div><span class="pill">@t.GroupName · @t.TestType · @t.Questions.Count questions</span><h2>@t.Title</h2><p>@t.TimeLimitMinutes min · Pass @t.PassingScore% · Random @(t.RandomizeQuestions?"ON":"OFF")</p><span class="status-dot @(t.IsPublished?"on":"")"></span> @(t.IsPublished?"Published":"Draft")</div><a class="big-btn" asp-action="TestQuestions" asp-route-testId="@t.Id">Manage Questions →</a></article>}</div>

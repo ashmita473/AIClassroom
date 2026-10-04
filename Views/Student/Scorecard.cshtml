@@ -1,0 +1,10 @@
+@model AIClassroom.Models.Student
+@{ViewData["Title"]="Scorecard"; var accuracy=(double)(ViewBag.Accuracy??0);}
+<div class="assess-shell"><div class="assess-wrap">
+<header class="assess-top"><a class="assess-brand" asp-controller="Student" asp-action="Index"><span>AI</span> CLASSROOM</a><nav class="assess-nav"><a asp-controller="Student" asp-action="Index">Home</a><a asp-controller="Student" asp-action="Quizzes">Quizzes</a><a asp-controller="Test" asp-action="Index">Tests</a><a class="active" asp-controller="Student" asp-action="Scorecard">Scorecard</a></nav></header>
+<section class="assess-hero"><div class="assess-eyebrow">PERSONAL SCORECARD</div><h1>@Model.Name</h1><p>Class @Model.ClassNumber · Group @Model.GroupName · Roll @Model.RollNumber</p></section>
+<div class="result-stats" style="margin:18px 0"><div class="result-stat"><b>@Model.TotalXp</b><span>XP</span></div><div class="result-stat"><b>@ViewBag.LessonsCompleted/@ViewBag.TotalLessons</b><span>Lessons</span></div><div class="result-stat"><b>@ViewBag.Games</b><span>Games</span></div><div class="result-stat"><b>@ViewBag.Tests</b><span>Tests</span></div><div class="result-stat"><b>@accuracy%</b><span>Accuracy</span></div></div>
+<section class="assess-card"><h2>Topic Performance</h2><div class="topic-grid">@foreach(var x in ViewBag.TopicPerformance){<div class="topic-row"><header><strong>@x.Topic</strong><b>@x.Accuracy%</b></header><div class="topic-bar"><i style="width:@x.Accuracy%"></i></div></div>}</div></section>
+<div class="area-grid"><div class="area-box"><h3>Strong Areas</h3><ul>@foreach(var x in ViewBag.TopicPerformance){if(x.Accuracy>=80){<li>@x.Topic — @x.Accuracy%</li>}}</ul></div><div class="area-box"><h3>Needs Revision</h3><ul>@foreach(var x in ViewBag.TopicPerformance){if(x.Accuracy<70){<li>@x.Topic — @x.Accuracy%</li>}}</ul></div></div>
+<section class="assess-card" style="margin-top:18px"><h2>XP History</h2>@foreach(var x in ViewBag.XpHistory){<div class="xp-row"><span>@(x.Points>=0?"+":"")@x.Points</span><p>@x.Reason</p></div>}</section>
+</div></div>

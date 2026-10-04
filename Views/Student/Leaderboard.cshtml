@@ -1,0 +1,4 @@
+@model List<AIClassroom.Models.Student>
+@{ViewData["Title"]="Leaderboard";}
+<div class="page-title"><div><div class="eyebrow">YOUR CLASS</div><h1>🏆 Leaderboard</h1><p class="muted">A friendly class challenge. Team missions can be used alongside this view.</p></div></div>
+<div class="table-wrap pixel"><table><thead><tr><th>Rank</th><th>Student</th><th>Class</th><th>XP</th></tr></thead><tbody>@for(var i=0;i<Model.Count;i++){var s=Model[i];<tr><td>@((i+1) switch {1=>"🥇",2=>"🥈",3=>"🥉",_=>"#"+(i+1)})</td><td>@s.Avatar @s.Name</td><td>@s.ClassNumber</td><td>⭐ @s.TotalXp</td></tr>}</tbody></table></div>

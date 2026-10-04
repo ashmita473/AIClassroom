@@ -1,0 +1,4 @@
+@model AIClassroom.Models.Test
+@{ViewData["Title"]="Test Question Bank";}
+<div class="page-title"><div><div class="eyebrow">TEST BUILDER · @Model.TestType.ToUpper()</div><h1>@Model.Title</h1><p class="muted">@Model.Questions.Count questions · Pass @Model.PassingScore% · @Model.TimeLimitMinutes minutes</p></div><a class="big-btn primary" asp-action="AddQuestion" asp-route-parentType="Test" asp-route-parentId="@Model.Id">+ Add Question</a></div>
+<div class="question-list">@foreach(var q in Model.Questions.OrderBy(x=>x.SortOrder)){<article class="bank-row"><div><small>@q.QuestionType · @q.Topic · @q.Points pts</small><p><strong>@q.Prompt</strong></p></div><form method="post" asp-action="DeleteQuestion"><input type="hidden" name="id" value="@q.Id"/><button class="danger-btn">Delete</button></form></article>}</div>

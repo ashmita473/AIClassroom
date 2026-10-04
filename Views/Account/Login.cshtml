@@ -1,0 +1,89 @@
+@model AIClassroom.Models.StudentLoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Student Login";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Classroom — Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/login-pixel.css" asp-append-version="true" />
+<style>
+.role-back-link{display:block;margin-top:8px;color:#c9c1ed;text-decoration:none;font:18px 'VT323',monospace}
+.role-back-link:hover{color:#ff82d8}
+</style>
+</head>
+<body>
+    <div class="login-world">
+        <div class="scene-bg" aria-hidden="true"></div>
+        <div class="motion-layer" aria-hidden="true">
+        <img class="floating-robot robot-float-left" src="/images/robot-left-float.png" alt="" aria-hidden="true" />
+        <img class="floating-robot robot-float-right" src="/images/robot-right-float.png" alt="" aria-hidden="true" />
+            <span class="shooting-star"></span>
+            <span class="breeze-leaf leaf-1"></span>
+            <span class="breeze-leaf leaf-2"></span>
+            <span class="breeze-leaf leaf-3"></span>
+            <span class="breeze-leaf leaf-4"></span>
+            <span class="pixel-mote mote-1"></span>
+            <span class="pixel-mote mote-2"></span>
+            <span class="pixel-mote mote-3"></span>
+            <span class="pixel-mote mote-4"></span>
+        </div>
+
+        <main class="login-card" id="student-login">
+            <div class="login-eyebrow">AI CLASSROOM</div>
+            <div class="login-heading">STUDENT LOGIN</div>
+            <p class="login-subtitle">Choose your class details to continue</p>
+
+            <div asp-validation-summary="ModelOnly" class="login-validation"></div>
+
+            <form method="post" class="pixel-form" autocomplete="off">
+                <div class="pixel-input">
+                    <span class="field-icon user-icon" aria-hidden="true"></span>
+                    <input asp-for="Name" placeholder="Name" autocomplete="name" required />
+                </div>
+
+                <div class="pixel-input">
+                    <span class="field-icon hash-icon" aria-hidden="true">#</span>
+                    <input asp-for="RollNumber" placeholder="Roll Number" required />
+                </div>
+
+                <div class="pixel-input select-wrap">
+                    <span class="field-icon school-icon" aria-hidden="true"></span>
+                    <select asp-for="ClassNumber" aria-label="Class">
+                        <option value="3">Class 3</option>
+                        <option value="4">Class 4</option>
+                        <option value="5">Class 5</option>
+                        <option value="6">Class 6</option>
+                        <option value="7">Class 7</option>
+                        <option value="8">Class 8</option>
+                    </select>
+                    <span class="chevron" aria-hidden="true"></span>
+                </div>
+
+                <div class="pixel-input">
+                    <span class="field-icon lock-icon" aria-hidden="true"></span>
+                    <input id="Pin" name="Pin" asp-for="Pin" type="password" maxlength="8" placeholder="PIN" inputmode="numeric" required />
+                    <button type="button" class="eye-button" id="togglePin" aria-label="Show PIN"></button>
+                </div>
+
+                <button class="login-button" type="submit">LOG IN <span class="double-arrow">»</span></button>
+            </form>
+            <a class="role-back-link" href="/">← Back to “Who is it?”</a>
+        </main><script>
+        const pin = document.getElementById('Pin');
+        const toggle = document.getElementById('togglePin');
+        toggle.addEventListener('click', () => {
+            const visible = pin.type === 'text';
+            pin.type = visible ? 'password' : 'text';
+            toggle.classList.toggle('visible', !visible);
+            toggle.setAttribute('aria-label', visible ? 'Show PIN' : 'Hide PIN');
+        });
+</script>
+</body>
+</html>

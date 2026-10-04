@@ -1,0 +1,268 @@
+:root {
+    --bg-top: #17134a;
+    --bg-bottom: #090722;
+    --card: #100b2f;
+    --card-deep: #0b0824;
+    --pink: #ff65cf;
+    --pink-soft: #ff9be5;
+    --purple: #8e55e8;
+    --purple-dark: #5b319d;
+    --text: #fff8ff;
+    --muted: #c9c1e8;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'VT323', monospace;
+    color: var(--text);
+    background:
+        linear-gradient(180deg, var(--bg-top) 0%, #100c35 48%, var(--bg-bottom) 100%);
+}
+
+/* Completely separate entry screen. No artwork/background image is used here. */
+.entry-page {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    min-height: 620px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* Very subtle pixel texture so the background remains clean rather than empty. */
+.entry-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: .11;
+    background-image:
+        linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px);
+    background-size: 8px 8px;
+}
+
+/* Soft vignette only; no scene elements. */
+.entry-page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(circle at center, transparent 25%, rgba(0,0,0,.22) 100%);
+}
+
+.role-card {
+    position: relative;
+    width: min(590px, 90vw);
+    padding: 42px 42px 34px;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(16,11,47,.99), rgba(10,7,31,.99));
+    border: 3px solid var(--pink);
+    box-shadow:
+        0 0 0 4px rgba(101,49,183,.72),
+        0 0 30px rgba(255,84,211,.28),
+        0 22px 60px rgba(0,0,0,.48);
+}
+
+.role-card::before,
+.role-card::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #171044;
+    border: 3px solid var(--pink);
+}
+
+.role-card::before {
+    left: -3px;
+    top: -3px;
+    box-shadow: 6px 6px 0 var(--purple);
+}
+
+.role-card::after {
+    right: -3px;
+    top: -3px;
+    box-shadow: -6px 6px 0 var(--purple);
+}
+
+/* Small robot decoration belongs to the card, not the background world. */
+.role-card-robot {
+    position: absolute;
+    width: 76px;
+    height: 38px;
+    left: 50%;
+    top: -30px;
+    transform: translateX(-50%);
+    background: #a9a4ff;
+    border: 4px solid #e9dcff;
+    box-shadow: inset 0 -7px 0 #7771d7, 0 0 0 4px #8e52e8;
+}
+
+.role-card-robot::before {
+    content: "";
+    position: absolute;
+    width: 7px;
+    height: 9px;
+    background: #62edff;
+    left: 18px;
+    top: 12px;
+    box-shadow: 30px 0 0 #62edff;
+}
+
+.role-card-robot::after {
+    content: "";
+    position: absolute;
+    width: 5px;
+    height: 8px;
+    background: #8e52e8;
+    left: 32px;
+    top: -11px;
+}
+
+.role-eyebrow {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    color: var(--pink-soft);
+    text-shadow: 2px 2px 0 #6e35b9;
+}
+
+.role-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(22px, 3vw, 34px);
+    line-height: 1.35;
+    margin: 16px 0 12px;
+    color: #fff7ff;
+    text-shadow: 3px 3px 0 #8e43db, 0 0 12px #ff75dd;
+}
+
+.role-subtitle {
+    font-size: 24px;
+    color: #e0d9f5;
+    margin: 0 0 26px;
+    line-height: 1.05;
+}
+
+.role-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.role-button {
+    position: relative;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: white;
+    background: #0d0a32;
+    border: 3px solid #7044b8;
+    box-shadow: inset 0 0 0 2px #18104a, 0 5px 0 var(--purple-dark);
+    transition:
+        transform .16s ease,
+        filter .16s ease,
+        border-color .16s ease,
+        box-shadow .16s ease;
+}
+
+.role-button:hover {
+    transform: translateY(-5px);
+    filter: brightness(1.1);
+    border-color: #ff78d5;
+    box-shadow:
+        inset 0 0 0 2px #281560,
+        0 8px 0 var(--purple-dark),
+        0 0 20px rgba(255,92,211,.32);
+}
+
+.role-button:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 0 0 2px #281560, 0 2px 0 var(--purple-dark);
+}
+
+.role-character {
+    width: auto;
+    height: 78px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 7px rgba(110,225,255,.25));
+    margin-bottom: 8px;
+}
+
+.role-label {
+    display: block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    text-shadow: 2px 2px 0 #6e35b9;
+}
+
+.role-caption {
+    display: block;
+    font-size: 18px;
+    color: var(--muted);
+    margin-top: 6px;
+}
+
+.role-footer {
+    font-size: 18px;
+    color: var(--muted);
+    margin-top: 20px;
+}
+
+@media (max-width: 650px) {
+    .entry-page {
+        min-height: 560px;
+        padding: 24px 12px;
+    }
+
+    .role-card {
+        padding: 34px 20px 25px;
+    }
+
+    .role-options {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .role-button {
+        min-height: 120px;
+        flex-direction: row;
+        gap: 16px;
+        justify-content: flex-start;
+        padding: 12px 22px;
+    }
+
+    .role-character {
+        height: 72px;
+        margin: 0;
+    }
+
+    .role-copy {
+        text-align: left;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .role-button {
+        transition: none;
+    }
+}

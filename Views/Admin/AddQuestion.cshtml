@@ -1,0 +1,11 @@
+@model AIClassroom.Models.QuestionEditorViewModel
+@{ViewData["Title"]="Add Question";}
+<div class="editor-shell"><div class="editor-card"><div class="eyebrow">QUESTION BANK</div><h1>Add @Model.ParentType Question</h1>
+<div class="editor-help">Supported types: MCQ, True/False, Image question, Match the following, Ordering, Scenario and Short answer. For MCQ/True-False/Image options, write one option per line and add <b>| correct</b> to the correct option.</div>
+<form method="post" asp-action="AddQuestion" enctype="multipart/form-data"><div asp-validation-summary="ModelOnly" style="color:#ff6b6b;font-weight:bold;margin:8px 0"></div><input type="hidden" asp-for="ParentType"/><input type="hidden" asp-for="ParentId"/>
+<div class="editor-grid"><label>Question type<select asp-for="QuestionType"><option>MCQ</option><option>TrueFalse</option><option>Image</option><option>Match</option><option>Ordering</option><option>Scenario</option><option>ShortAnswer</option></select></label><label>Topic<input asp-for="Topic" placeholder="AI Basics, Sensors, ML..."/></label><label>Points<input asp-for="Points" type="number" min="1"/></label><label>Difficulty<select asp-for="Difficulty"><option>Easy</option><option>Medium</option><option>Hard</option></select></label><label>Sort order<input asp-for="SortOrder" type="number" min="0"/></label><label>Image path (optional)<input asp-for="ImagePath" placeholder="/images/questions/example.png"/></label><label>Or upload image<input asp-for="ImageFile" type="file" accept="image/*"/></label></div>
+<label>Question / scenario<textarea asp-for="Prompt" rows="4" required></textarea></label>
+<label>Answer / accepted answers<textarea asp-for="Answer" rows="2" placeholder="Short answer: use | between accepted answers. Scenario: use | between accepted answers."></textarea></label>
+<label>Options / pairs<textarea asp-for="OptionsText" rows="8" placeholder="MCQ: Camera | correct&#10;Chair&#10;Book&#10;Pencil&#10;&#10;Match: Camera => Sees images&#10;Microphone => Hears sound&#10;&#10;Ordering: Step 1&#10;Step 2&#10;Step 3"></textarea></label>
+<label>Explanation<textarea asp-for="Explanation" rows="3"></textarea></label><label class="check"><input asp-for="IsBanked"/> Keep this question in the reusable question bank</label>
+<button class="big-btn primary">Save Question</button></form></div></div>

@@ -1,0 +1,38 @@
+@model AIClassroom.Models.Game
+@{
+    ViewData["Title"] = Model.Name;
+    var type = Model.GameType.ToUpperInvariant();
+}
+<section class="game-mission-page">
+    <a class="mission-back" asp-action="Games">← Back to Game Missions</a>
+    <div class="mission-shell">
+        <div class="mission-art-large">
+            <img src="~/images/games/@(Model.GameType switch {
+                "classification"=>"classification.svg","pattern"=>"pattern.svg","sequence"=>"robot.svg","matching"=>"sensor.svg",
+                "logic"=>"chatbot.svg","maze"=>"maze.svg","flowchart"=>"flowchart.svg","creative"=>"creator.svg","data"=>"data.svg",
+                "training"=>"trainer.svg","accuracy"=>"accuracy.svg","ethics"=>"bias.svg","nlp"=>"nlp.svg","sentiment"=>"sentiment.svg",
+                "prompt"=>"prompt.svg","model"=>"model.svg","problem"=>"problem.svg", _=>"classification.svg"})" alt="">
+        </div>
+        <div class="mission-content">
+            <span class="game-type">@type MISSION</span>
+            <h1>@Model.Name</h1>
+            <p>@Model.Description</p>
+            <div class="mission-rewards">
+                <div><small>BASE REWARD</small><strong>+@Model.BaseXp XP</strong></div>
+                <div><small>PERFECT BONUS</small><strong>+100 XP</strong></div>
+                <div><small>BADGE</small><strong>Earn by mastering missions</strong></div>
+            </div>
+            <div class="mission-info">
+                <span>ATTEMPTS: @(ViewBag.Attempts ?? 0)</span>
+                <span>BEST SCORE: @(ViewBag.BestScore ?? 0)%</span>
+            </div>
+            <form method="post" asp-action="PlayGame">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id">
+                <input type="hidden" name="score" value="100">
+                <button class="mission-start">START MISSION <span>→</span></button>
+            </form>
+            <p class="mission-note">This mission framework is ready for the interactive game logic. Your score and XP are recorded when the mission is completed.</p>
+        </div>
+    </div>
+</section>

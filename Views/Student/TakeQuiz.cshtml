@@ -1,0 +1,85 @@
+@model AIClassroom.Models.AssessmentTakeViewModel
+@{ ViewData["Title"]=Model.Title; }
+<div class="quiz-page">
+<div class="quiz-wrap">
+<header class="quest-header quiz-home-header">
+    <a class="quest-logo" asp-controller="Student" asp-action="Index" aria-label="AI Classroom">
+        <span class="logo-ai">AI</span><span class="logo-classroom">CLASSROOM</span>
+    </a>
+    <nav class="quest-main-nav" aria-label="Student navigation">
+        <a asp-controller="Student" asp-action="Index"><img src="~/images/home/learn.png" alt="">Home</a>
+        <a asp-controller="Curriculum" asp-action="Index"><img src="~/images/home/notes.png" alt="">Learn</a>
+        <a asp-controller="Student" asp-action="Games"><img src="~/images/home/games.png" alt="">Games</a>
+        <a class="active" asp-controller="Student" asp-action="Quizzes"><img src="~/images/home/rank.png" alt="">Quizzes</a>
+        <a asp-controller="Test" asp-action="Index"><img src="~/images/home/tasks.png" alt="">Tests</a>
+    </nav>
+    <div class="quest-profile">
+        <img src="~/images/character/base-girl-reference.png" alt="Student avatar">
+        <span>@User.Identity?.Name</span><span class="profile-chevron">⌄</span>
+        <a class="home-logout" asp-controller="Account" asp-action="Logout">Logout</a>
+    </div>
+</header>
+<a class="quiz-back" asp-action="Quizzes">← Back to Quizzes</a>
+<section class="take-head">
+ <div class="take-copy"><div class="quiz-eyebrow">@Model.Title.ToUpper() QUIZ</div><h1><span class="white">Let's Test</span> <span class="gold">What You Learned!</span></h1><p>Answer the questions and earn stars!</p></div>
+ <img class="take-art" src="~/images/quiz-ui/take-hero.png" alt="Friendly robot holding a pencil and AI book"/>
+</section>
+@if (Model.StartedAtUnixMs <= 0)
+{
+    <section class="quiz-start-panel">
+        <div class="quiz-start-art"><img src="~/images/quiz-ui/take-hero.png" alt="Friendly learning robot" /></div>
+        <div class="quiz-start-copy">
+            <div class="quiz-eyebrow">READY FOR YOUR QUIZ?</div>
+            <h2>Let's get started!</h2>
+            <p>You're about to begin <strong>@Model.Title</strong>.</p>
+            <div class="quiz-start-details">
+                <div><span>⏱</span><strong>@Model.TimeLimitMinutes minutes</strong><small>Time limit</small></div>
+                <div><span>★</span><strong>@Model.PassingScore%</strong><small>Passing score</small></div>
+                <div><span>✓</span><strong>Instant</strong><small>Results</small></div>
+            </div>
+            <p class="quiz-start-note">The timer will start only when you click <strong>Start Quiz</strong>. Make sure you're ready before starting.</p>
+            <form method="post" asp-action="TakeQuiz" class="quiz-start-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <input type="hidden" name="Start" value="true" />
+                <button class="take-submit" type="submit">Start Quiz <span>→</span></button>
+            </form>
+            <a class="quiz-cancel" asp-action="Quizzes">← Go Back</a>
+        </div>
+    </section>
+}
+else
+{
+<form id="assessmentForm" class="take-form" method="post" asp-action="TakeQuiz">
+@Html.AntiForgeryToken()<input type="hidden" name="Id" value="@Model.Id"/><input type="hidden" name="StartedAtUnixMs" value="@Model.StartedAtUnixMs" id="startedAt"/>
+<div class="take-timer"><span class="timer-circle"></span><strong class="timer-time" id="timer">00:00</strong><div class="take-progress"><i id="progress"></i></div><span class="take-count">Question 1 of @Model.Questions.Count</span></div>
+@for(var i=0;i<Model.Questions.Count;i++){
+ var q=Model.Questions[i]; var art=(i%3==0?"take-camera.png":i%3==1?"take-brain.png":"take-data.png");
+ <input type="hidden" name="QuestionIds" value="@q.Id"/>
+ <section class="quiz-question-card">
+  <div class="q-content">
+   <div class="q-label">QUESTION @(i+1)</div><div class="q-topic">@q.Topic · @q.Points points</div><h2>@q.Prompt</h2>
+   @if(q.QuestionType is "MCQ" or "TrueFalse" or "Image") { <div class="q-options">@foreach(var o in q.Options){<label class="answer-option"><input type="radio" name="Answers[@q.Id]" value="@o.Text"/> <span>@o.Text</span></label>}</div> }
+   else if(q.QuestionType is "ShortAnswer" or "Scenario"){<input class="short-answer" name="Answers[@q.Id]" placeholder="Type your answer"/>}
+   else if(q.QuestionType=="Match"){
+    <input type="hidden" name="Answers[@q.Id]" id="match_@q.Id"/><div class="match-grid">@{var choices=q.Options.Select(x=>x.MatchKey??"").Where(x=>x!="").Distinct().OrderBy(_=>Guid.NewGuid()).ToList();}@foreach(var o in q.Options){<div class="match-row"><span>@o.Text</span><select data-match-question="@q.Id" data-match-left="@o.Text"><option value="">Choose a match</option>@foreach(var c in choices){<option value="@c">@c</option>}</select></div>}</div>
+   } else if(q.QuestionType=="Ordering"){
+    <input type="hidden" name="Answers[@q.Id]" id="order_@q.Id"/><div class="order-grid">@foreach(var o in q.Options.OrderBy(_=>Guid.NewGuid())){<div class="order-row"><span>@o.Text</span><select data-order-question="@q.Id" data-order-text="@o.Text"><option value="">Position</option>@for(var n=1;n<=q.Options.Count;n++){<option value="@n">@n</option>}</select></div>}</div>
+   }
+  </div>
+  <img class="q-art" src="~/images/quiz-ui/@art" alt="Learning illustration"/>
+ </section>
+}
+<button class="take-submit" type="submit">Submit Quiz <span>→</span></button>
+</form>
+
+}
+
+</div>
+</div>
+
+@section Scripts{<script>
+(()=>{const form=document.getElementById('assessmentForm');if(!form)return;const limit=@(Model.TimeLimitMinutes*60),started=Number(document.getElementById('startedAt').value),timer=document.getElementById('timer'),progress=document.getElementById('progress');
+function sync(){document.querySelectorAll('[data-match-question]').forEach(x=>{const id=x.dataset.matchQuestion,h=document.getElementById('match_'+id),obj={};document.querySelectorAll('[data-match-question="'+id+'"]').forEach(s=>obj[s.dataset.matchLeft]=s.value);h.value=JSON.stringify(obj);});document.querySelectorAll('[data-order-question]').forEach(x=>{const id=x.dataset.orderQuestion,h=document.getElementById('order_'+id),arr=[];document.querySelectorAll('[data-order-question="'+id+'"]').forEach(s=>{if(s.value)arr[Number(s.value)-1]=s.dataset.orderText;});h.value=JSON.stringify(arr.filter(Boolean));});}
+function tick(){const elapsed=Math.max(0,Math.floor((Date.now()-started)/1000)),remain=Math.max(0,limit-elapsed);timer.textContent=String(Math.floor(remain/60)).padStart(2,'0')+':'+String(remain%60).padStart(2,'0');progress.style.width=Math.min(100,elapsed*100/limit)+'%';if(remain<=0){sync();form.submit();return;}setTimeout(tick,1000)}form.addEventListener('submit',sync);tick();})();
+</script>}

@@ -1,0 +1,47 @@
+@{
+    ViewData["Title"] = "AI Classroom — Who is it?";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Classroom — Who is it?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/role-landing.css" asp-append-version="true" />
+</head>
+<body>
+    <main class="entry-page">
+        <section class="role-card" aria-labelledby="role-title">
+            <div class="role-card-robot" aria-hidden="true"></div>
+
+            <div class="role-eyebrow">AI CLASSROOM</div>
+            <h1 class="role-title" id="role-title">WHO IS IT?</h1>
+            <p class="role-subtitle">Choose your learning path</p>
+
+            <div class="role-options">
+                <a class="role-button" asp-controller="Account" asp-action="Login" aria-label="Student login">
+                    <img class="role-character" src="/images/robot-left-float.png" alt="" />
+                    <span class="role-copy">
+                        <span class="role-label">STUDENT</span>
+                        <span class="role-caption">Learn &amp; Play</span>
+                    </span>
+                </a>
+
+                <a class="role-button" asp-controller="Account" asp-action="AdminLogin" aria-label="Teacher login">
+                    <img class="role-character" src="/images/robot-right-float.png" alt="" />
+                    <span class="role-copy">
+                        <span class="role-label">TEACHER</span>
+                        <span class="role-caption">Control Center</span>
+                    </span>
+                </a>
+            </div>
+
+            <div class="role-footer">Pick a path to enter AI Classroom.</div>
+        </section>
+    </main>
+</body>
+</html>

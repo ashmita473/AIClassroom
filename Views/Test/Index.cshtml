@@ -1,0 +1,8 @@
+@model List<AIClassroom.Models.Test>
+@{ ViewData["Title"]="Tests"; }
+<div class="assess-shell"><div class="assess-wrap">
+<header class="assess-top"><a class="assess-brand" asp-controller="Student" asp-action="Index"><span>AI</span> CLASSROOM</a><nav class="assess-nav"><a asp-controller="Student" asp-action="Index">Home</a><a asp-controller="Curriculum" asp-action="Index">Learn</a><a asp-controller="Student" asp-action="Games">Games</a><a asp-controller="Student" asp-action="Quizzes">Quizzes</a><a class="active" asp-controller="Test" asp-action="Index">Tests</a></nav></header>
+<section class="assess-hero"><div class="assess-eyebrow">ASSESSMENT LAB</div><h1>Tests & Assessments</h1><p>Separate assessments for unit tests, module tests, revision tests and final assessment.</p></section>
+<div class="assess-grid">
+@foreach(var t in Model){<article class="assess-card"><div class="assess-eyebrow">@t.TestType.ToUpper() TEST · @t.GroupName</div><h2>@t.Title</h2><p>Results include score, percentage, correct, wrong, skipped, time taken and topic performance.</p><div class="assess-meta"><span class="assess-pill">@t.Questions.Count questions</span><span class="assess-pill">@t.TimeLimitMinutes min</span><span class="assess-pill">Pass @t.PassingScore%</span></div><div class="assess-actions"><a class="assess-btn" asp-action="Take" asp-route-id="@t.Id">Start Test →</a></div></article>}
+</div></div></div>

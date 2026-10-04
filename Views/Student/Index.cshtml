@@ -1,0 +1,197 @@
+@model AIClassroom.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "AI Classroom";
+    var level = Math.Max(1, Model.Student.TotalXp / 250 + 1);
+    var next = level * 250;
+    var pct = Math.Clamp(Model.Student.TotalXp * 100 / next, 0, 100);
+}
+
+<section class="quest-home">
+    <div class="quest-stars"></div>
+
+    <header class="quest-header">
+        <a class="quest-logo" asp-controller="Student" asp-action="Index" aria-label="AI Classroom">
+            <span class="logo-ai">AI</span><span class="logo-classroom">CLASSROOM</span>
+        </a>
+
+        <nav class="quest-main-nav" aria-label="Student navigation">
+            <a class="active" asp-controller="Student" asp-action="Index"><img src="~/images/home/learn.png" alt="">Home</a>
+            <a asp-controller="Curriculum" asp-action="Index"><img src="~/images/home/notes.png" alt="">Learn</a>
+            <a asp-controller="Student" asp-action="Games"><img src="~/images/home/games.png" alt="">Games</a>
+            <a asp-controller="Student" asp-action="Quizzes"><img src="~/images/home/rank.png" alt="">Quizzes</a>
+            <a asp-controller="Test" asp-action="Index"><img src="~/images/home/tasks.png" alt="">Tests</a>
+        </nav>
+
+        <div class="quest-profile">
+            <img src="~/images/character/base-girl-reference.png" alt="Student avatar">
+            <span>@Model.Student.Name</span>
+            <span class="profile-chevron">⌄</span>
+            <a class="home-logout" asp-controller="Account" asp-action="Logout">Logout</a>
+        </div>
+    </header>
+
+    <main class="quest-main">
+        @if (ViewBag.LiveClass == true)
+        {
+            <div class="quest-live">
+                <span>LIVE CLASS</span>
+                <b>Your teacher is live now.</b>
+                <a asp-controller="Live" asp-action="StudentRoom">Join Live Class</a>
+            </div>
+        }
+
+        <section class="quest-hero">
+            <div class="hero-character">
+                <img class="hero-robot" src="~/images/robot-left-float.png" alt="Robo">
+                <div class="speech-bubble">Hi,<br><strong>Explorer!</strong></div>
+                <div class="hero-copy">
+                    <span>READY FOR YOUR NEXT MISSION?</span>
+                    <h1>Let's learn something new today!</h1>
+                </div>
+            </div>
+
+            <article class="mission-card">
+                <div class="mission-copy">
+                    <div class="mission-kicker">CURRENT MISSION</div>
+                    @if (Model.NextDays.Any())
+                    {
+                        var mission = Model.NextDays.First();
+                        <h2>@mission.Title</h2>
+                        <p>@mission.ContentSummary</p>
+                        <a class="mission-button" asp-controller="Student" asp-action="Lesson" asp-route-id="@mission.Id">
+                            Continue Mission <span>→</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <h2>All missions complete!</h2>
+                        <p>Great work. Check your quizzes, tests and tasks for your next challenge.</p>
+                        <a class="mission-button" asp-controller="Curriculum" asp-action="Index">Explore World <span>→</span></a>
+                    }
+                </div>
+                <div class="mission-art">
+                    <img src="~/images/home/mission.png" alt="Current mission">
+                </div>
+            </article>
+
+            <aside class="level-card">
+                <div class="level-title">LEVEL @level</div>
+                <div class="level-xp"><img src="~/images/home/rank.png" alt=""> @Model.Student.TotalXp / @next XP</div>
+                <div class="level-bar"><i style="width:@pct%"></i></div>
+                <img class="level-planet" src="~/images/home/games.png" alt="Adventure">
+            </aside>
+        </section>
+
+        <section class="quest-cards six-card-grid">
+            <a class="quest-card learn-card" asp-controller="Curriculum" asp-action="Index">
+                <img class="card-icon" src="~/images/home/notes.png" alt="">
+                <h2>Learn</h2>
+                <p>Explore fun lessons with Robo!</p>
+                <span class="round-arrow">→</span>
+            </a>
+
+            <a class="quest-card games-card" asp-controller="Student" asp-action="Games">
+                <img class="card-icon" src="~/images/home/games.png" alt="">
+                <h2>Games</h2>
+                <p>Play and practice what you learn!</p>
+                <span class="round-arrow">→</span>
+            </a>
+
+            <a class="quest-card quizzes-card" asp-controller="Student" asp-action="Quizzes">
+                <img class="card-icon" src="~/images/home/rank.png" alt="">
+                <h2>Quizzes</h2>
+                <p>Test your knowledge and earn XP!</p>
+                <span class="round-arrow">→</span>
+            </a>
+
+            <a class="quest-card character-card" asp-controller="Student" asp-action="Customize">
+                <img class="card-icon" src="~/images/home/customize.png" alt="">
+                <h2>Customize</h2>
+                <p>Build your own learning character!</p>
+                <span class="round-arrow">→</span>
+            </a>
+
+            <a class="quest-card tests-card" asp-controller="Test" asp-action="Index">
+                <img class="card-icon" src="~/images/home/tasks.png" alt="">
+                <h2>Tests</h2>
+                <p>Show what you know and earn XP!</p>
+                <span class="round-arrow">→</span>
+            </a>
+
+            <a class="quest-card notes-card" asp-controller="Student" asp-action="Notes">
+                <img class="card-icon" src="~/images/home/notes.png" alt="">
+                <h2>Notes</h2>
+                <p>Keep your learning discoveries.</p>
+                <span class="round-arrow">→</span>
+            </a>
+
+            <a class="quest-card tasks-card" asp-controller="Student" asp-action="Assignments">
+                <img class="card-icon" src="~/images/home/tasks.png" alt="">
+                <h2>Tasks</h2>
+                <p>Complete teacher challenges and collect XP.</p>
+                <span class="round-arrow">→</span>
+            </a>
+        </section>
+
+        <section class="class-ranking">
+            <div class="ranking-heading">
+                <div>
+                    <div class="mission-kicker">YOUR CLASS</div>
+                    <h2>Class Ranking</h2>
+                    <p>Earn XP through lessons, games, quizzes, tests and tasks.</p>
+                </div>
+                <a class="ranking-link" asp-controller="Student" asp-action="Leaderboard">View full ranking →</a>
+            </div>
+
+            <div class="ranking-list">
+                @for (var i = 0; i < Model.ClassRanking.Count; i++)
+                {
+                    var student = Model.ClassRanking[i];
+                    var isMe = student.Id == Model.Student.Id;
+                    <div class="ranking-row @(isMe ? "is-me" : "")">
+                        <div class="ranking-position">@(i + 1)</div>
+                        <div class="ranking-avatar">
+                            <img src="~/images/character/base-girl-reference.png" alt="">
+                        </div>
+                        <div class="ranking-name">
+                            <strong>@student.Name</strong>
+                            @if (isMe) { <span>YOU</span> }
+                        </div>
+                        <div class="ranking-xp">@student.TotalXp XP</div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="home-bottom-grid">
+            <div class="home-panel">
+                <div class="mission-kicker">TEACHER UPDATES</div>
+                <h2>Messages</h2>
+                @foreach (var announcement in Model.Announcements)
+                {
+                    <div class="announcement-row">
+                        <strong>@announcement.Title</strong>
+                        <p>@announcement.Message</p>
+                    </div>
+                }
+                @if (!Model.Announcements.Any())
+                {
+                    <p class="home-muted">No new messages.</p>
+                }
+            </div>
+
+            <div class="home-panel">
+                <div class="mission-kicker">ACHIEVEMENTS</div>
+                <h2>Badges to chase</h2>
+                <div class="home-badge-grid">
+                    @foreach (var badge in Model.Badges)
+                    {
+                        <div class="home-badge">
+                            <span>@badge.Name</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+    </main>
+</section>

@@ -1,0 +1,26 @@
+@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>@ViewData["Title"] · AI Classroom</title>
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/character.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/student-home.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/learn-world.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/games-arcade.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/quiz-test.css" asp-append-version="true" />
+</head>
+<body>
+@if (User.Identity?.IsAuthenticated == true && User.IsInRole("Student"))
+{
+    <main class="student-shell">@RenderBody()</main>
+}
+else
+{
+    <header class="topbar"><a class="brand" asp-controller="Home" asp-action="Index"><span>AI CLASSROOM</span></a><div class="top-actions">@if(User.Identity?.IsAuthenticated==true){<span class="who">@User.Identity.Name</span><a class="small-btn" asp-controller="Account" asp-action="Logout">Logout</a>}else{<a class="small-btn" asp-controller="Account" asp-action="AdminLogin">Teacher</a><a class="small-btn primary" asp-controller="Account" asp-action="Login">Student</a>}</div></header>
+    @if(User.Identity?.IsAuthenticated==true && (User.IsInRole("SuperAdmin")||User.IsInRole("Teacher"))){<nav class="student-nav admin-nav"><a asp-controller="Admin" asp-action="Index">Dashboard</a><a asp-controller="Admin" asp-action="Students">Students</a><a asp-controller="Admin" asp-action="Curriculum">Curriculum</a><a asp-controller="Admin" asp-action="Games">Games</a><a asp-controller="Admin" asp-action="Quizzes">Quizzes</a><a asp-controller="Admin" asp-action="QuestionBank">Question Bank</a><a asp-controller="Admin" asp-action="Tests">Tests</a><a asp-controller="Admin" asp-action="Assignments">Assignments</a><a asp-controller="Admin" asp-action="Analytics">Analytics</a><a asp-controller="Admin" asp-action="Live">Live Class</a><a asp-controller="Admin" asp-action="Notes">Notes</a><a asp-controller="Admin" asp-action="Announcements">Messages</a><a asp-controller="Admin" asp-action="QuizResults">Quiz Results</a><a asp-controller="Admin" asp-action="TestResults">Test Results</a><a asp-controller="Admin" asp-action="Reports">Reports</a></nav>}
+    <main class="page">@RenderBody()</main>
+}
+<script src="~/js/site.js" asp-append-version="true"></script>@await RenderSectionAsync("Scripts", required:false)
+</body></html>

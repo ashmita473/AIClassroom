@@ -1,0 +1,51 @@
+@model List<AIClassroom.Models.Quiz>
+@{ 
+    ViewData["Title"]="Quizzes";
+    var cards = new[] {
+        new { Title="AI Basics", Desc="Test your understanding of what AI is and where we see it.", Art="brain.png", Match="AI Basics" },
+        new { Title="AI in Daily Life", Desc="Find out how AI helps us in real life.", Art="car.png", Match="Daily Life" },
+        new { Title="AI vs Non-AI", Desc="Can you tell what is AI and what is not?", Art="cat.png", Match="AI + ML" },
+        new { Title="Sensors", Desc="Test what you know about different sensors.", Art="sensor.png", Match="Sensors" },
+        new { Title="Patterns", Desc="Find the missing pattern and spot the next one.", Art="pattern.png", Match="Pattern" },
+        new { Title="Robots & Instructions", Desc="See how well you can give the correct instructions.", Art="robot.png", Match="Robot" }
+    };
+}
+<div class="quiz-page">
+<div class="quiz-wrap">
+<header class="quest-header quiz-home-header">
+    <a class="quest-logo" asp-controller="Student" asp-action="Index" aria-label="AI Classroom">
+        <span class="logo-ai">AI</span><span class="logo-classroom">CLASSROOM</span>
+    </a>
+    <nav class="quest-main-nav" aria-label="Student navigation">
+        <a asp-controller="Student" asp-action="Index"><img src="~/images/home/learn.png" alt="">Home</a>
+        <a asp-controller="Curriculum" asp-action="Index"><img src="~/images/home/notes.png" alt="">Learn</a>
+        <a asp-controller="Student" asp-action="Games"><img src="~/images/home/games.png" alt="">Games</a>
+        <a class="active" asp-controller="Student" asp-action="Quizzes"><img src="~/images/home/rank.png" alt="">Quizzes</a>
+        <a asp-controller="Test" asp-action="Index"><img src="~/images/home/tasks.png" alt="">Tests</a>
+    </nav>
+    <div class="quest-profile">
+        <img src="~/images/character/base-girl-reference.png" alt="Student avatar">
+        <span>@User.Identity?.Name</span><span class="profile-chevron">⌄</span>
+        <a class="home-logout" asp-controller="Account" asp-action="Logout">Logout</a>
+    </div>
+</header>
+<section class="quiz-hero">
+    <div class="quiz-hero-copy"><div class="quiz-eyebrow">Knowledge Lab</div><h1><span class="white">Quick</span> <span class="gold">Quizzes</span></h1><p>Test what you've learned with fun, short quizzes. Earn XP, unlock badges and see your progress!</p></div>
+    <img class="quiz-hero-art" src="~/images/quiz-ui/hero.png" alt="Friendly AI Classroom robot holding a trophy"/>
+    <div class="quiz-progress"><div class="quiz-progress-label">YOUR PROGRESS</div><div class="quiz-progress-row"><span class="star-icon"></span><span>3 / 12 Quizzes</span></div><div class="quiz-progress-bar"><i></i></div></div>
+</section>
+<h2 class="quiz-section-title">Quiz Sections</h2><p class="quiz-section-sub">Choose a topic to start a quiz. Each quiz has a few questions and gives instant feedback!</p>
+<div class="quiz-grid">
+@for(var i=0;i<cards.Length;i++){
+    var c=cards[i];
+    var q=Model.FirstOrDefault(x => x.Title.Contains(c.Match,StringComparison.OrdinalIgnoreCase));
+    <article class="quiz-card">
+        <div class="quiz-card-content"><div class="quiz-tag"><img class="tiny-art" src="~/images/quiz-ui/@c.Art" alt=""/> @c.Title</div><p>@c.Desc</p></div>
+        <img class="quiz-card-art" src="~/images/quiz-ui/@c.Art" alt="@c.Title"/>
+        <div class="quiz-card-footer"><span class="quiz-pill">◷ 10 min</span><span class="quiz-pill">▤ @(q?.Questions.Count ?? 3) questions</span>
+        @if(q!=null){<a class="quiz-start" asp-action="TakeQuiz" asp-route-id="@q.Id">Start Quiz →</a>}else{<span class="quiz-start disabled">Start Quiz →</span>}
+        </div>
+    </article>
+}
+</div>
+</div></div>

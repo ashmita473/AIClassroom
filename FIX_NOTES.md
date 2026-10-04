@@ -1,0 +1,1 @@
+Fixed model navigation properties for LiveClass.CurriculumDay and StudentBadge.Badge/Student. This resolves the six CS1061 build errors from LiveController, StudentController, and Views/Live/Room.cshtml.
