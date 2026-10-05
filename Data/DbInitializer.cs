@@ -1,15 +1,14 @@
 using AIClassroom.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace AIClassroom.Data;
 
-/// <summary>Compatibility entry point. The active seed logic lives in SeedData.
-/// This class intentionally contains no duplicate entity creation code.
-/// </summary>
+/// <summary>Runs EF Core migrations and the idempotent seed routine.</summary>
 public static class DbInitializer
 {
     public static async Task InitializeAsync(AppDbContext db, PasswordService passwords)
     {
-        await db.Database.EnsureCreatedAsync();
+        await db.Database.MigrateAsync();
         await SeedData.InitializeAsync(db, passwords);
     }
 }

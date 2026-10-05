@@ -11,6 +11,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CurriculumDay> CurriculumDays => Set<CurriculumDay>();
     public DbSet<Lesson> Lessons => Set<Lesson>();
     public DbSet<Activity> Activities => Set<Activity>();
+    public DbSet<LessonVideo> LessonVideos => Set<LessonVideo>();
+    public DbSet<StudentLessonVideoProgress> StudentLessonVideoProgress => Set<StudentLessonVideoProgress>();
     public DbSet<Game> Games => Set<Game>();
     public DbSet<GameResult> GameResults => Set<GameResult>();
     public DbSet<Question> Questions => Set<Question>();
@@ -42,6 +44,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         b.Entity<CurriculumModule>().HasIndex(x => new { x.GroupName, x.Code }).IsUnique();
         b.Entity<CurriculumDay>().HasIndex(x => new { x.CurriculumModuleId, x.DayNumber }).IsUnique();
         b.Entity<Lesson>().HasIndex(x => x.CurriculumDayId).IsUnique();
+        b.Entity<LessonVideo>().HasIndex(x => new { x.LessonId, x.SortOrder });
+        b.Entity<StudentLessonVideoProgress>().HasIndex(x => new { x.StudentId, x.LessonVideoId }).IsUnique();
+        b.Entity<StudentLessonVideoProgress>().HasOne(x => x.Student).WithMany().HasForeignKey(x => x.StudentId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<StudentLessonVideoProgress>().HasOne(x => x.LessonVideo).WithMany().HasForeignKey(x => x.LessonVideoId).OnDelete(DeleteBehavior.Cascade);
         b.Entity<ScoreSetting>().HasIndex(x => x.Key).IsUnique();
         b.Entity<StudentBadge>().HasIndex(x => new { x.StudentId, x.BadgeId }).IsUnique();
         b.Entity<LiveClass>().HasOne(x => x.CurriculumDay).WithMany().HasForeignKey(x => x.CurriculumDayId).OnDelete(DeleteBehavior.Restrict);

@@ -1,2 +1,15 @@
 @model List<AIClassroom.Models.TeacherNote>
-@{ViewData["Title"]="Teacher Notes";}<div class="page-title"><div><div class="eyebrow">TEACHER CONTENT</div><h1>📝 Notes</h1></div><a class="big-btn primary" asp-action="AddNote">+ Add Note</a></div><div class="note-grid">@foreach(var n in Model){<article class="note pixel"><h2>@n.Title</h2><p>@n.Content</p></article>}</div>
+@{
+    ViewData["Title"] = "Teacher Notes";
+    string Category(string title){ if(title.StartsWith("[")){var e=title.IndexOf(']'); if(e>1)return title[1..e];} return "Pre-written"; }
+    string Clean(string title){ if(title.StartsWith("[")){var e=title.IndexOf(']'); if(e>1)return title[(e+1)..].Trim();} return title; }
+}
+<div class="admin-notes-page">
+ <div class="page-title"><div><div class="eyebrow">TEACHER CONTENT</div><h1>Teacher Notes</h1><p class="muted">Publish ready-to-use notes that students can open from their learning notebook.</p></div><a class="big-btn primary" asp-action="AddNote">+ Add Teacher Note</a></div>
+ <div class="teacher-admin-toolbar pixel"><div class="teacher-admin-filters">@foreach(var c in new[]{"All","Pre-written","Lesson Notes","Important Points","Examples","Revision Notes"}){<button type="button" class="teacher-admin-filter @(c=="All"?"active":"")" data-category="@c">@c</button>}</div><input id="teacherNoteSearch" placeholder="Search teacher notes..."></div>
+ <div class="admin-teacher-note-grid" id="adminTeacherNoteGrid">
+ @foreach(var n in Model){var cat=Category(n.Title);<article class="admin-teacher-note pixel" data-category="@cat" data-search="@n.Title @n.Content"><div class="admin-note-icon"><img src="~/images/home/notes.png" alt=""></div><div><span class="teacher-note-category">@cat</span><h2>@Clean(n.Title)</h2><p>@n.Content</p></div></article>}
+ @if(!Model.Any()){<div class="empty pixel">No teacher notes yet. Create the first classroom note.</div>}
+ </div>
+</div>
+@section Scripts { <script src="~/js/admin-notes.js" asp-append-version="true"></script> }

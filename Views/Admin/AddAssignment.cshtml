@@ -1,2 +1,20 @@
-@model AIClassroom.Models.Assignment
-@{ViewData["Title"]="Add Assignment";}<div class="form-card pixel"><div class="eyebrow">CLASSROOM TASKS</div><h1>📚 Create Assignment</h1><form method="post"><label>Title<input asp-for="Title" required/></label><label>Instructions<textarea asp-for="Instructions" rows="8" required></textarea></label><div class="form-grid"><label>Group<select asp-for="GroupName"><option>A</option><option>B</option><option>All</option></select></label><label>Due date<input asp-for="DueDateUtc" type="datetime-local"/></label><label>XP<input asp-for="XpReward" type="number" min="0"/></label></div><label class="check"><input asp-for="IsPublished"/> Publish now</label><button class="big-btn primary">💾 Save Assignment</button></form></div>
+@model AIClassroom.Models.AssignmentEditViewModel
+@{ViewData["Title"] = "Create Assignment";}
+<div class="assignment-page assignment-editor-page"><div class="assignment-wrap">
+  <a class="assignment-back" asp-action="Assignments">← Back to Assignments</a>
+  <section class="assignment-editor-shell">
+    <div class="assignment-editor-hero"><div class="assignment-eyebrow">NEW CLASSROOM MISSION</div><h1>Create an assignment<br/><span>students will remember.</span></h1><p>Give students a clear goal, a due date and an XP reward. Their work will appear in your submission inbox.</p><div class="editor-checks"><span>✓ Instructions</span><span>✓ Due date</span><span>✓ XP reward</span><span>✓ Submission review</span></div></div>
+    <form method="post" class="assignment-form">@Html.AntiForgeryToken()
+      <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+      <label>Assignment title<input asp-for="Title" placeholder="e.g. Design your own AI assistant" required/><span asp-validation-for="Title"></span></label>
+      <label>Instructions<textarea asp-for="Instructions" rows="9" placeholder="Tell students what to do, what to include and how to complete the task..." required></textarea><span asp-validation-for="Instructions"></span></label>
+      <div class="assignment-form-grid">
+        <label>Student group<select asp-for="GroupName"><option value="A">Group A</option><option value="B">Group B</option><option value="All">All groups</option></select></label>
+        <label>XP reward<input asp-for="XpReward" type="number" min="0" max="1000"/></label>
+        <label>Due date<input asp-for="DueDateUtc" type="datetime-local"/></label>
+      </div>
+      <label class="assignment-publish"><input asp-for="IsPublished"/> Publish immediately for students</label>
+      <div class="assignment-form-actions"><a class="assignment-secondary" asp-action="Assignments">Cancel</a><button class="assignment-primary" type="submit">Create Assignment →</button></div>
+    </form>
+  </section>
+</div></div>

@@ -1,0 +1,3 @@
+@model AIClassroom.Models.CurriculumModuleEditViewModel
+@{ViewData["Title"]="Edit Module";}
+<div class="curriculum-editor-page"><div class="editor-shell"><div class="eyebrow">CURRICULUM ENGINE</div><h1>Edit @Model.Code</h1><p class="editor-subtitle">Change the module details without changing its lessons.</p><form method="post" class="editor-form">@Html.AntiForgeryToken()<input type="hidden" asp-for="Id" /><partial name="_ModuleFields" model="Model" /><div class="editor-actions"><a class="small-btn" asp-action="Curriculum" asp-route-group="@Model.GroupName">Cancel</a><button class="big-btn primary" type="submit">Save changes →</button></div></form></div></div>

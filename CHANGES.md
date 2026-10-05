@@ -19,7 +19,23 @@
 
 ## Not done (suggested next)
 - Teacher change-password and student PIN-reset UI (currently no way to change a PIN).
-- Teacher "Logout" is still a GET link (low risk); move to POST form.
+- Logout is now POST-only with antiforgery protection.
 - Self-host signalr.js (CDN script has no SRI) and move inline scripts to files to drop `'unsafe-inline'` from CSP.
-- Switch from `EnsureCreated` to EF migrations; add automated tests (quiz scoring, authorization).
-- Real game engines (Start Mission still posts a fixed score of 100 — XP is now capped so it's no longer exploitable).
+- Switched from `EnsureCreated` to EF migrations (hand-written, no model snapshot yet — see MIGRATIONS.md). NOTE: there is no automated test project in this ZIP.
+- Game missions now use server-validated interactive questions; Start Mission no longer posts a fixed score.
+
+## Test System UI & Assessment Tracks
+- Added a redesigned student Tests & Assessments experience matching the AI Classroom visual language.
+- Added four assessment tracks: Unit Tests, Module Tests, Revision Tests, and Final Assessment.
+- Added filterable test cards with question count, time limit, passing score, attempt history and best score.
+- Added responsive mobile layout and local `wwwroot/js/test-index.js` filtering (no inline JavaScript).
+- Seed data now adds missing Unit, Module, Revision and Final tests for Groups A and B without duplicating existing tests.
+
+## Review pass 2 (this update)
+- **Game answers were guessable:** the authored data has the correct option first, so choosing option 1 everywhere scored ~100%. Options are now shuffled per attempt with a server-held seed; submissions without a started attempt are rejected.
+- **Migrations:** added `ConfigureWarnings(Ignore(PendingModelChangesWarning))` (hand-written migrations have no ModelSnapshot, which makes EF 9/10 throw at `MigrateAsync`), and made `TeacherProfiles` idempotent for databases that already have the columns.
+- **Dev login:** cookies are `Secure=Always` only outside Development; the `http://localhost:5088` profile no longer loops back to login.
+- **Lesson HTML:** regex sanitizer replaced by the maintained `HtmlSanitizer` (Ganss.Xss) allow-list (http/https only).
+- **Profile picture:** validated by file signature, not file name; last SuperAdmin can no longer demote themselves.
+- **SignalR client** bundled in `wwwroot/lib/microsoft-signalr` (was an empty folder, so the live class would not connect without `libman restore`).
+- CSP `img-src` now allows `https:` so the lesson editor's "insert image URL" works; remove it if you only want local images.

@@ -1,2 +1,97 @@
 @model List<AIClassroom.Models.StudentNote>
-@{ViewData["Title"]="My Notes";}<div class="page-title"><div><div class="eyebrow">MY LEARNING LOG</div><h1>📝 Notes</h1></div><a class="big-btn primary" asp-action="NewNote">+ New Note</a></div><div class="note-grid">@foreach(var n in Model){<article class="note pixel">@if(n.IsPinned){<span class="pin">📌</span>}<h2>@n.Title</h2><p>@n.Content</p><form method="post" asp-action="DeleteNote"><input type="hidden" name="id" value="@n.Id"/><button class="danger-btn">Delete</button></form></article>}@if(!Model.Any()){<div class="empty pixel">No notes yet. Start your first learning note!</div>}</div>
+@using AIClassroom.Models
+@{
+    ViewData["Title"] = "My Notes";
+    var teacherNotes = ViewBag.TeacherNotes as List<TeacherNote> ?? new List<TeacherNote>();
+    string Category(string title)
+    {
+        if (title.StartsWith("[")) { var end = title.IndexOf(']'); if (end > 1) return title[1..end]; }
+        return "Pre-written";
+    }
+    string CleanTitle(string title)
+    {
+        if (title.StartsWith("[")) { var end = title.IndexOf(']'); if (end > 1) return title[(end + 1)..].Trim(); }
+        return title;
+    }
+    var categories = new[] { "All", "Pre-written", "Lesson Notes", "Important Points", "Examples", "Revision Notes" };
+}
+<div class="notes-page">
+    <div class="notes-wrap">
+        <header class="notes-header">
+            <a class="notes-brand" asp-controller="Student" asp-action="Index"><span class="brand-ai">AI</span><span class="brand-classroom">CLASSROOM</span></a>
+            <nav class="notes-nav" aria-label="Student navigation">
+                <a asp-controller="Student" asp-action="Index"><img src="~/images/ui/home.svg" alt="">Home</a>
+                <a asp-controller="Curriculum" asp-action="Index"><img src="~/images/ui/book.svg" alt="">Learn</a>
+                <a asp-controller="Student" asp-action="Games"><img src="~/images/ui/game.svg" alt="">Games</a>
+                <a asp-controller="Student" asp-action="Quizzes"><img src="~/images/ui/quiz.svg" alt="">Quizzes</a>
+                <a asp-controller="Test" asp-action="Index"><img src="~/images/home/tests.png" alt="">Tests</a>
+            </nav>
+            <div class="notes-profile">
+                <span class="notes-star">★</span>
+                <img src="~/images/character/base-boy-reference-proportions.png" alt="Student avatar">
+                <span>@User.Identity?.Name</span><span class="notes-chevron">⌄</span>
+            </div>
+        </header>
+
+        <section class="notes-hero">
+            <div class="notes-hero-copy">
+                <div class="notes-eyebrow">MY LEARNING LOG</div>
+                <h1>Write it down.<br><span>Remember it forever.</span></h1>
+                <p>Keep your own discoveries, save important ideas from your teacher, and build a notebook you can use whenever you revise.</p>
+                <div class="notes-hero-actions">
+                    <a class="notes-primary" asp-action="NewNote">+ Create a Note</a>
+                    <span class="notes-stat"><b>@Model.Count</b> My Notes</span>
+                    <span class="notes-stat"><b>@teacherNotes.Count</b> Teacher Notes</span>
+                </div>
+            </div>
+            <div class="notes-hero-art"><img src="~/images/home/notes.png" alt="Learning notebook"><span>✦</span><span>★</span></div>
+        </section>
+
+        <section class="notes-section">
+            <div class="notes-section-head">
+                <div><div class="notes-eyebrow">YOUR NOTEBOOK</div><h2>My Notes</h2><p>Create, edit, pin and search your learning notes.</p></div>
+                <div class="notes-tools">
+                    <label class="notes-search"><span>⌕</span><input id="noteSearch" type="search" placeholder="Search your notes..." autocomplete="off"></label>
+                    <a class="notes-new-btn" asp-action="NewNote">+ New Note</a>
+                </div>
+            </div>
+            <div class="notes-grid" id="myNotesGrid">
+                @foreach (var n in Model)
+                {
+                    <article class="my-note-card @(n.IsPinned ? "is-pinned" : "")" data-search="@n.Title @n.Content">
+                        <div class="note-card-top"><span class="note-type">MY NOTE</span>@if(n.IsPinned){<span class="pinned-label">★ PINNED</span>}</div>
+                        <h3>@n.Title</h3>
+                        <p>@n.Content</p>
+                        <div class="note-card-actions">
+                            <a asp-action="EditNote" asp-route-id="@n.Id">Edit</a>
+                            <form method="post" asp-action="PinNote">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@n.Id"><button type="submit">@(n.IsPinned ? "Unpin" : "Pin")</button></form>
+                            <form method="post" asp-action="DeleteNote" onsubmit="return confirm('Delete this note?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@n.Id"><button class="delete" type="submit">Delete</button></form>
+                        </div>
+                    </article>
+                }
+                <div class="notes-empty" id="myNotesEmpty" style="@(Model.Any() ? "display:none" : "")"><img src="~/images/home/notes.png" alt=""><h3>No notes yet</h3><p>Start your first learning note and save something you want to remember.</p><a class="notes-primary" asp-action="NewNote">Create my first note</a></div>
+            </div>
+        </section>
+
+        <section class="teacher-notes-section">
+            <div class="notes-section-head teacher-head">
+                <div><div class="notes-eyebrow">FROM YOUR TEACHER</div><h2>Teacher Notes</h2><p>Pre-written notes, important points, examples and revision material.</p></div>
+            </div>
+            <div class="teacher-filter-row">
+                @foreach(var c in categories){<button type="button" class="teacher-filter @(c=="All" ? "active" : "")" data-category="@c">@c</button>}
+            </div>
+            <div class="teacher-note-grid" id="teacherNotesGrid">
+                @foreach (var n in teacherNotes)
+                {
+                    var cat = Category(n.Title); var clean = CleanTitle(n.Title);
+                    <article class="teacher-note-card" data-category="@cat" data-search="@clean @n.Content">
+                        <div class="teacher-note-icon"><img src="~/images/home/notes.png" alt=""></div>
+                        <div><span class="teacher-note-category">@cat</span><h3>@clean</h3><p>@n.Content</p></div>
+                    </article>
+                }
+                @if(!teacherNotes.Any()) { <div class="teacher-empty"><span>✦</span><h3>Your teacher hasn't published notes yet.</h3><p>New classroom notes will appear here.</p></div> }
+            </div>
+        </section>
+    </div>
+</div>
+@section Scripts { <script src="~/js/student-notes.js" asp-append-version="true"></script> }

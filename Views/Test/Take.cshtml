@@ -1,31 +1,30 @@
 @model AIClassroom.Models.AssessmentTakeViewModel
-@{ ViewData["Title"]=Model.Title; }
-<div class="assess-shell"><div class="take-shell">
-<header class="assess-top"><a class="assess-brand" asp-controller="Test" asp-action="Index"><span>AI</span> CLASSROOM</a><nav class="assess-nav"><a asp-controller="Test" asp-action="Index" class="active">Back to Tests</a></nav></header>
-<form id="assessmentForm" method="post" asp-controller="Test" asp-action="Take">
-@Html.AntiForgeryToken()<input type="hidden" name="Id" value="@Model.Id"/><input type="hidden" name="StartedAtUnixMs" value="@Model.StartedAtUnixMs" id="startedAt"/>
-<div class="timerbar"><strong id="timer">00:00</strong><div class="progress-track"><i id="progress"></i></div><span>@Model.Questions.Count questions</span></div>
-@for(var i=0;i<Model.Questions.Count;i++){
- var q=Model.Questions[i]; <input type="hidden" name="QuestionIds" value="@q.Id"/>
- <section class="question-card"><div class="question-number">QUESTION @(i+1) · @q.QuestionType.ToUpper()</div><div class="question-topic">@q.Topic · @q.Points points</div><h2>@q.Prompt</h2>
- @if(!string.IsNullOrWhiteSpace(q.ImagePath)){<img class="question-image" src="@q.ImagePath" alt="Question image"/>}
- @if(q.QuestionType is "MCQ" or "TrueFalse" or "Image") { foreach(var o in q.Options){<label class="answer-option"><input type="radio" name="Answers[@q.Id]" value="@o.Text"/>@o.Text</label>} }
- else if(q.QuestionType is "ShortAnswer" or "Scenario"){<input class="short-answer" name="Answers[@q.Id]" placeholder="Type your answer"/>}
- else if(q.QuestionType=="Match"){
-  <input type="hidden" name="Answers[@q.Id]" id="match_@q.Id"/><div class="match-grid">
-  @{var choices=q.Options.Select(x=>x.MatchKey??"").Where(x=>x!="").Distinct().OrderBy(_=>Guid.NewGuid()).ToList();}
-  @foreach(var o in q.Options){<div class="match-row"><span>@o.Text</span><select data-match-question="@q.Id" data-match-left="@o.Text"><option value="">Choose a match</option>@foreach(var c in choices){<option value="@c">@c</option>}</select></div>}
+@{ ViewData["Title"] = Model.Title; }
+<div class="assess-shell">
+  <div class="assess-wrap take-wrap">
+    <header class="assess-top">
+      <a class="assess-brand" asp-controller="Student" asp-action="Index"><span class="brand-ai">AI</span> CLASSROOM</a>
+      <nav class="assess-nav">
+        <a asp-controller="Student" asp-action="Index"><img src="~/images/ui/home.svg" alt="">Home</a><a asp-controller="Curriculum" asp-action="Index"><img src="~/images/ui/book.svg" alt="">Learn</a><a asp-controller="Student" asp-action="Games"><img src="~/images/ui/game.svg" alt="">Games</a><a asp-controller="Student" asp-action="Quizzes"><img src="~/images/ui/quiz.svg" alt="">Quizzes</a><a asp-controller="Test" asp-action="Index" class="active"><img src="~/images/home/tests.png" alt="">Tests</a>
+      </nav>
+      <div class="assess-user"><img src="~/images/character/base-boy-reference-proportions.png" alt=""> <span>@User.Identity?.Name</span><span>⌄</span></div>
+    </header>
+    <a class="assess-back" asp-action="Index">← <span>Back to Tests</span></a>
+    <form id="assessmentForm" data-limit-seconds="@(Model.TimeLimitMinutes * 60)" method="post" asp-controller="Test" asp-action="Take">
+      @Html.AntiForgeryToken()<input type="hidden" name="Id" value="@Model.Id"/><input type="hidden" name="StartedAtUnixMs" value="@Model.StartedAtUnixMs" id="startedAt"/>
+      <div class="timerbar"><div class="timer-clock"><span class="clock-icon">◷</span><strong id="timer">00:00</strong></div><div class="progress-track"><i id="progress"></i></div><span class="question-count">@Model.Questions.Count questions</span></div>
+      @for(var i=0;i<Model.Questions.Count;i++){
+        var q=Model.Questions[i]; var art=(i%3==0?"take-brain.png":i%3==1?"take-data.png":"take-camera.png"); <input type="hidden" name="QuestionIds" value="@q.Id"/>
+        <section class="question-card qtone-@(i%3)"><div class="question-content"><div class="question-number">QUESTION @(i+1) · @q.QuestionType.ToUpper()</div><div class="question-topic">@q.Topic · @q.Points points</div><h2>@q.Prompt</h2>
+        @if(!string.IsNullOrWhiteSpace(q.ImagePath)){<img class="question-image" src="@q.ImagePath" alt="Question image"/>}
+        @if(q.QuestionType is "MCQ" or "TrueFalse" or "Image") { <div class="answer-list">@foreach(var o in q.Options){<label class="answer-option"><input type="radio" name="Answers[@q.Id]" value="@o.Text"/><span>@o.Text</span></label>}</div> }
+        else if(q.QuestionType is "ShortAnswer" or "Scenario"){<input class="short-answer" name="Answers[@q.Id]" placeholder="Type your answer"/>}
+        else if(q.QuestionType=="Match"){<input type="hidden" name="Answers[@q.Id]" id="match_@q.Id"/><div class="match-grid">@{var choices=q.Options.Select(x=>x.MatchKey??"").Where(x=>x!="").Distinct().OrderBy(_=>Guid.NewGuid()).ToList();}@foreach(var o in q.Options){<div class="match-row"><span>@o.Text</span><select data-match-question="@q.Id" data-match-left="@o.Text"><option value="">Choose a match</option>@foreach(var c in choices){<option value="@c">@c</option>}</select></div>}</div>}
+        else if(q.QuestionType=="Ordering"){<input type="hidden" name="Answers[@q.Id]" id="order_@q.Id"/><div class="order-grid">@foreach(var o in q.Options.OrderBy(_=>Guid.NewGuid())){<div class="order-row"><span>@o.Text</span><select data-order-question="@q.Id" data-order-text="@o.Text"><option value="">Position</option>@for(var n=1;n<=q.Options.Count;n++){<option value="@n">@n</option>}</select></div>}</div>}
+        </div><img class="question-art" src="~/images/quiz-ui/@art" alt="Learning illustration"/></section>
+      }
+      <div class="submit-bar"><button class="take-submit" type="submit">Submit Test <span>→</span></button></div>
+    </form>
   </div>
- } else if(q.QuestionType=="Ordering"){
-  <input type="hidden" name="Answers[@q.Id]" id="order_@q.Id"/><div class="order-grid">
-  @foreach(var o in q.Options.OrderBy(_=>Guid.NewGuid())){<div class="order-row"><span>@o.Text</span><select data-order-question="@q.Id" data-order-text="@o.Text"><option value="">Position</option>@for(var n=1;n<=q.Options.Count;n++){<option value="@n">@n</option>}</select></div>}
-  </div>
- }
- </section>
-}
-<button class="take-submit" type="submit">Submit Test <span>→</span></button></form>
-</div></div>
-@section Scripts{<script>
-(()=>{const form=document.getElementById('assessmentForm'),limit=@(Model.TimeLimitMinutes*60),started=Number(document.getElementById('startedAt').value),timer=document.getElementById('timer'),progress=document.getElementById('progress');
-function sync(){document.querySelectorAll('[data-match-question]').forEach(x=>{const id=x.dataset.matchQuestion,h=document.getElementById('match_'+id),obj={};document.querySelectorAll('[data-match-question="'+id+'"]').forEach(s=>obj[s.dataset.matchLeft]=s.value);h.value=JSON.stringify(obj);});document.querySelectorAll('[data-order-question]').forEach(x=>{const id=x.dataset.orderQuestion,h=document.getElementById('order_'+id),arr=[];document.querySelectorAll('[data-order-question="'+id+'"]').forEach(s=>{if(s.value)arr[Number(s.value)-1]=s.dataset.orderText;});h.value=JSON.stringify(arr.filter(Boolean));});}
-function tick(){const elapsed=Math.max(0,Math.floor((Date.now()-started)/1000)),remain=Math.max(0,limit-elapsed);timer.textContent=String(Math.floor(remain/60)).padStart(2,'0')+':'+String(remain%60).padStart(2,'0');progress.style.width=Math.min(100,elapsed*100/limit)+'%';if(remain<=60)timer.classList.add('time-danger');if(remain<=0){sync();form.submit();return;}setTimeout(tick,1000);}form.addEventListener('submit',sync);tick();})();</script>}
+</div>
+@section Scripts { <script src="~/js/assessment-take.js" asp-append-version="true"></script> }

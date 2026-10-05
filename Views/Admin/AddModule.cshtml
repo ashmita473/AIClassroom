@@ -1,0 +1,3 @@
+@model AIClassroom.Models.CurriculumModuleEditViewModel
+@{ViewData["Title"]="Add Module";}
+<div class="curriculum-editor-page"><div class="editor-shell"><div class="eyebrow">CURRICULUM ENGINE</div><h1>Create a learning module</h1><p class="editor-subtitle">Set the group, class range and module title. You can add lessons next.</p><form method="post" class="editor-form">@Html.AntiForgeryToken()<partial name="_ModuleFields" model="Model" /><div class="editor-actions"><a class="small-btn" asp-action="Curriculum">Cancel</a><button class="big-btn primary" type="submit">Save module →</button></div></form></div></div>

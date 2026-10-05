@@ -1,0 +1,16 @@
+@model AIClassroom.Models.ChangeStudentPinViewModel
+@{ ViewData["Title"] = "Change Student PIN"; }
+<div class="form-card pixel">
+    <div class="eyebrow">STUDENT SECURITY</div>
+    <h1>Change Student PIN</h1>
+    <p>Update the sign-in PIN for <strong>@Model.StudentName</strong> · Roll @Model.RollNumber · Class @Model.ClassNumber.</p>
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="StudentId" />
+        <label>New PIN<input asp-for="NewPin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" required /></label>
+        <label>Confirm PIN<input asp-for="ConfirmPin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" required /></label>
+        <span asp-validation-for="NewPin" class="text-danger"></span><span asp-validation-for="ConfirmPin" class="text-danger"></span>
+        <button class="small-btn primary" type="submit">Save New PIN</button>
+        <a class="small-btn" asp-action="Students">Cancel</a>
+    </form>
+</div>

@@ -16,7 +16,7 @@
     <div class="quest-profile">
         <img src="~/images/character/base-girl-reference.png" alt="Student avatar">
         <span>@User.Identity?.Name</span><span class="profile-chevron">⌄</span>
-        <a class="home-logout" asp-controller="Account" asp-action="Logout">Logout</a>
+        <form class="logout-form" method="post" asp-controller="Account" asp-action="Logout">@Html.AntiForgeryToken()<button class="home-logout" type="submit">Logout</button></form>
     </div>
 </header>
 <a class="quiz-back" asp-action="Quizzes">← Back to Quizzes</a>
@@ -50,7 +50,7 @@
 }
 else
 {
-<form id="assessmentForm" class="take-form" method="post" asp-action="TakeQuiz">
+<form id="assessmentForm" class="take-form" data-limit-seconds="@(Model.TimeLimitMinutes * 60)" method="post" asp-action="TakeQuiz">
 @Html.AntiForgeryToken()<input type="hidden" name="Id" value="@Model.Id"/><input type="hidden" name="StartedAtUnixMs" value="@Model.StartedAtUnixMs" id="startedAt"/>
 <div class="take-timer"><span class="timer-circle"></span><strong class="timer-time" id="timer">00:00</strong><div class="take-progress"><i id="progress"></i></div><span class="take-count">Question 1 of @Model.Questions.Count</span></div>
 @for(var i=0;i<Model.Questions.Count;i++){
@@ -78,8 +78,4 @@ else
 </div>
 </div>
 
-@section Scripts{<script>
-(()=>{const form=document.getElementById('assessmentForm');if(!form)return;const limit=@(Model.TimeLimitMinutes*60),started=Number(document.getElementById('startedAt').value),timer=document.getElementById('timer'),progress=document.getElementById('progress');
-function sync(){document.querySelectorAll('[data-match-question]').forEach(x=>{const id=x.dataset.matchQuestion,h=document.getElementById('match_'+id),obj={};document.querySelectorAll('[data-match-question="'+id+'"]').forEach(s=>obj[s.dataset.matchLeft]=s.value);h.value=JSON.stringify(obj);});document.querySelectorAll('[data-order-question]').forEach(x=>{const id=x.dataset.orderQuestion,h=document.getElementById('order_'+id),arr=[];document.querySelectorAll('[data-order-question="'+id+'"]').forEach(s=>{if(s.value)arr[Number(s.value)-1]=s.dataset.orderText;});h.value=JSON.stringify(arr.filter(Boolean));});}
-function tick(){const elapsed=Math.max(0,Math.floor((Date.now()-started)/1000)),remain=Math.max(0,limit-elapsed);timer.textContent=String(Math.floor(remain/60)).padStart(2,'0')+':'+String(remain%60).padStart(2,'0');progress.style.width=Math.min(100,elapsed*100/limit)+'%';if(remain<=0){sync();form.submit();return;}setTimeout(tick,1000)}form.addEventListener('submit',sync);tick();})();
-</script>}
+<script src="~/js/assessment-take.js" asp-append-version="true"></script>

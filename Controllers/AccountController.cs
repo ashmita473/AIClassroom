@@ -58,14 +58,21 @@ public class AccountController(AppDbContext db, PasswordService passwords, Login
         }
         throttle.RecordSuccess(ClientIp, account);
         logger.LogInformation("Teacher login: {User} from {Ip}", username, ClientIp);
-        await SignIn(teacher.Id.ToString(), teacher.Name, teacher.Role, "", "");
+        await SignIn(teacher.Id.ToString(), teacher.Name, teacher.Role, "", "", teacher.ProfileImagePath);
         return RedirectToAction("Index", "Admin");
     }
-    [Authorize] public async Task<IActionResult> Logout() { await HttpContext.SignOutAsync(); return RedirectToAction(nameof(Login)); }
-    public IActionResult AccessDenied() => View();
-    private async Task SignIn(string id, string name, string role, string group, string classNumber)
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Logout()
     {
-        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier,id), new(ClaimTypes.Name,name), new(ClaimTypes.Role,role), new("Group",group), new("ClassNumber",classNumber) };
+        await HttpContext.SignOutAsync();
+        return RedirectToAction(nameof(Login));
+    }
+    public IActionResult AccessDenied() => View();
+    private async Task SignIn(string id, string name, string role, string group, string classNumber, string profileImage = "")
+    {
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier,id), new(ClaimTypes.Name,name), new(ClaimTypes.Role,role), new("Group",group), new("ClassNumber",classNumber), new("ProfileImage",profileImage ?? "") };
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)));
     }
 }

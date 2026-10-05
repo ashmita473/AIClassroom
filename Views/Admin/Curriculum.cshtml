@@ -1,4 +1,34 @@
 @model List<AIClassroom.Models.CurriculumModule>
-@{ViewData["Title"]="Curriculum";}
-<div class="page-title"><div><div class="eyebrow">CURRICULUM ENGINE</div><h1>📚 Curriculum</h1></div><div><a class="small-btn @(ViewBag.Group=="A"?"primary":"")" asp-action="Curriculum" asp-route-group="A">Group A</a><a class="small-btn @(ViewBag.Group=="B"?"primary":"")" asp-action="Curriculum" asp-route-group="B">Group B</a></div></div>
-@foreach(var m in Model){<section class="module pixel"><div class="module-head"><div><span class="pill">@m.Code · Group @m.GroupName · Class @m.ClassMin–@m.ClassMax</span><h2>@m.Title</h2></div><span>@m.Days.Count days</span></div><div class="day-grid">@foreach(var d in m.Days.OrderBy(x=>x.DayNumber)){<div class="day-card @(d.IsLocked?"locked":"open")"><div><b>DAY @d.DayNumber</b><h3>@d.Title</h3><p>@d.ContentSummary</p></div><form method="post" asp-action="ToggleDay" asp-route-id="@d.Id"><button class="small-btn">@(d.IsLocked?"🔒 Unlock":"🟢 Lock")</button></form></div>}</div></section>}
+@{ ViewData["Title"]="Curriculum"; }
+<div class="curriculum-admin-page">
+    <div class="curriculum-admin-head">
+        <div><div class="eyebrow">CURRICULUM ENGINE</div><h1><span class="curriculum-book">▤</span> Curriculum</h1><p>Build lessons, set XP, publish content and connect activities or quizzes.</p></div>
+        <div class="curriculum-head-actions">
+            <a class="small-btn" asp-action="Curriculum" asp-route-group="A">Group A</a>
+            <a class="small-btn" asp-action="Curriculum" asp-route-group="B">Group B</a>
+            <a class="small-btn primary" asp-action="AddModule">+ Add Module</a>
+        </div>
+    </div>
+    @if(TempData["CurriculumMessage"] is string message){<div class="curriculum-alert">✓ @message</div>}
+    @foreach(var m in Model)
+    {
+        <section class="curriculum-module-card">
+            <div class="curriculum-module-head">
+                <div><span class="curriculum-code">@m.Code · GROUP @m.GroupName · CLASS @m.ClassMin–@m.ClassMax</span><h2>@m.Title</h2><p>@m.Days.Count lessons</p></div>
+                <div class="curriculum-module-actions"><a class="small-btn" asp-action="EditModule" asp-route-id="@m.Id">Edit module</a><a class="small-btn primary" asp-action="AddDay" asp-route-moduleId="@m.Id">+ Add lesson</a></div>
+            </div>
+            <div class="curriculum-day-admin-grid">
+            @foreach(var d in m.Days.OrderBy(x=>x.DayNumber))
+            {
+                <article class="curriculum-day-admin-card @(d.IsLocked?"is-locked":"")">
+                    <div class="curriculum-day-admin-top"><span>LESSON @d.DayNumber</span><b class="@(d.IsPublished&&!d.IsLocked?"published":"draft")">@(d.IsLocked?"LOCKED":d.IsPublished?"PUBLISHED":"DRAFT")</b></div>
+                    <h3>@d.Title</h3><p>@d.ContentSummary</p>
+                    <div class="curriculum-day-meta"><span>⭐ @d.XpReward XP</span><span>@(d.Lesson?.Activities.Count ?? 0) activities</span></div>
+                    <div class="curriculum-day-actions"><a class="small-btn primary" asp-action="EditLesson" asp-route-dayId="@d.Id">Edit lesson</a><a class="small-btn" asp-action="EditDay" asp-route-id="@d.Id">Lesson settings</a><form method="post" asp-action="ToggleDay" asp-route-id="@d.Id">@Html.AntiForgeryToken()<button class="small-btn" type="submit">@(d.IsLocked?"Unlock":"Lock")</button></form></div>
+                </article>
+            }
+            </div>
+        </section>
+    }
+    @if(!Model.Any()){<div class="curriculum-empty"><h2>No curriculum yet</h2><p>Create your first module and then add lessons.</p><a class="big-btn primary" asp-action="AddModule">+ Create module</a></div>}
+</div>

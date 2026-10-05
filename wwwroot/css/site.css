@@ -3,3 +3,6 @@
 @media(max-width:600px){.page{width:min(100% - 20px,1200px)}.topbar{padding:12px 15px}.who{display:none}.hero{padding:35px 22px}.choice-grid,.mission-grid,.game-grid,.note-grid,.admin-grid,.stat-grid,.form-grid,.day-grid{grid-template-columns:1fr}.dashboard-head,.page-title,.lesson-head,.live-head{align-items:flex-start;flex-direction:column}.robot-card{width:100%}.quiz-list .panel{flex-direction:column;align-items:flex-start}.score-hero{grid-template-columns:1fr;text-align:left}.score-big{text-align:left}.filter-bar{grid-template-columns:1fr}.float{display:none}}
 
 .student-shell{width:100%;}
+
+/* POST logout form */
+.logout-form{display:inline;margin:0;padding:0}.logout-form button{font:inherit;cursor:pointer;border:0;background:none}

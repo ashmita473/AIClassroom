@@ -1,0 +1,56 @@
+@model AIClassroom.Models.LessonEditorViewModel
+@{ViewData["Title"]="Lesson Editor";}
+<div class="lesson-editor-page">
+    <div class="lesson-editor-head"><div><div class="eyebrow">LESSON STUDIO</div><h1>@Model.DayTitle</h1><p>Build the lesson like a simple Word document. Format text, add images, activities and connect quizzes.</p></div><div class="lesson-editor-head-actions"><a class="small-btn" asp-action="Curriculum">← Curriculum</a><a class="small-btn" asp-action="EditDay" asp-route-id="@Model.CurriculumDayId">Lesson settings</a></div></div>
+    <form method="post" id="lessonEditorForm" class="lesson-editor-form">@Html.AntiForgeryToken()<input type="hidden" asp-for="CurriculumDayId" />
+        <section class="word-editor-card">
+            <div class="word-toolbar" role="toolbar">
+                <select data-command="fontName" title="Font"><option value="Arial">Arial</option><option value="Trebuchet MS">Trebuchet MS</option><option value="Georgia">Georgia</option><option value="Verdana">Verdana</option><option value="Courier New">Courier New</option></select>
+                <select data-command="fontSize" title="Size"><option value="3">Normal</option><option value="1">Small</option><option value="4">Large</option><option value="5">Heading</option><option value="6">Big heading</option></select>
+                <button type="button" data-command="bold"><b>B</b></button><button type="button" data-command="italic"><i>I</i></button><button type="button" data-command="underline"><u>U</u></button><button type="button" data-command="insertUnorderedList">• List</button><button type="button" data-command="insertOrderedList">1. List</button><button type="button" data-command="justifyLeft">Left</button><button type="button" data-command="justifyCenter">Center</button><button type="button" data-command="justifyRight">Right</button><button type="button" id="insertImage">Image</button><button type="button" id="createLink">Link</button><button type="button" data-command="removeFormat">Clear</button>
+            </div>
+            <div class="editor-help">Select text and format it. Use <b>Image</b> to insert an image URL. You can drag images into the editor in most modern browsers.</div>
+            <div class="lesson-section-editor"><label>Introduction</label><div class="rich-editor" contenteditable="true" data-target="Introduction">@Html.Raw(Model.Introduction)</div><textarea asp-for="Introduction" class="rich-source"></textarea></div>
+            <div class="lesson-section-editor"><label>Learn / Explanation</label><div class="rich-editor" contenteditable="true" data-target="Explanation">@Html.Raw(Model.Explanation)</div><textarea asp-for="Explanation" class="rich-source"></textarea></div>
+            <div class="lesson-section-editor"><label>Examples</label><div class="rich-editor" contenteditable="true" data-target="Examples">@Html.Raw(Model.Examples)</div><textarea asp-for="Examples" class="rich-source"></textarea></div>
+            <div class="lesson-section-editor"><label>Teacher Focus / Notes</label><div class="rich-editor" contenteditable="true" data-target="TeacherNotes">@Html.Raw(Model.TeacherNotes)</div><textarea asp-for="TeacherNotes" class="rich-source"></textarea></div>
+            <div class="lesson-section-editor"><label>Student Notes Template</label><div class="rich-editor" contenteditable="true" data-target="StudentNotesTemplate">@Html.Raw(Model.StudentNotesTemplate)</div><textarea asp-for="StudentNotesTemplate" class="rich-source"></textarea></div>
+        </section>
+        <section class="editor-side-card">
+            <div class="side-card-head"><div><div class="eyebrow">ACTIVITIES</div><h2>Mission activities</h2></div><button type="button" class="small-btn primary" id="addActivity">+ Add activity</button></div>
+            <div id="activityList">
+            @for(var i=0;i<Model.Activities.Count;i++){
+                var a=Model.Activities[i];
+                <div class="activity-editor-row"><input type="hidden" name="Activities[@i].Id" value="@a.Id" /><div class="editor-grid-3"><label>Type<input name="Activities[@i].ActivityType" value="@a.ActivityType" /></label><label>XP<input name="Activities[@i].XpReward" type="number" min="0" value="@a.XpReward" /></label><label>Order<input name="Activities[@i].SortOrder" type="number" value="@a.SortOrder" /></label></div><label>Activity title<input name="Activities[@i].Title" value="@a.Title" /></label><label>Activity content<textarea class="activity-rich" name="Activities[@i].Content" rows="3">@a.Content</textarea></label><label class="delete-row"><input type="checkbox" name="Activities[@i].Delete" value="true" /> Delete this activity</label></div>
+            }
+            </div>
+            <div class="side-card-divider"></div>
+            <div class="side-card-head"><div><div class="eyebrow">QUIZ CONNECTION</div><h2>Connect quizzes</h2></div></div>
+            <p class="side-muted">Choose quizzes that should appear as part of this lesson. Create the quiz from the Quizzes menu.</p>
+            <div class="quiz-link-list">
+            @foreach(var q in Model.AvailableQuizzes){<label class="quiz-link-option"><input type="checkbox" name="SelectedQuizIds" value="@q.Id" @(Model.SelectedQuizIds.Contains(q.Id)?"checked":"") /><span><b>@q.Title</b><small>@q.QuestionCount questions · @(q.IsPublished?"Published":"Draft")</small></span></label>}
+            @if(!Model.AvailableQuizzes.Any()){<div class="empty-side">No quizzes for this group yet. Create one in <a asp-action="Quizzes">Quizzes</a>, then return here.</div>}
+            </div>
+            <div class="side-card-divider"></div>
+            <div class="side-card-head"><div><div class="eyebrow">VIDEO LESSONS</div><h2>YouTube learning videos</h2></div><button type="button" class="small-btn primary" id="addVideo">+ Add video</button></div>
+            <p class="side-muted">Paste a YouTube link. Students stay inside AI Classroom while the video plays. Required videos must be watched before the lesson can be completed.</p>
+            <div id="videoList">
+            @for(var i=0;i<Model.Videos.Count;i++){
+                var v=Model.Videos[i];
+                <div class="video-editor-row" data-video-row>
+                    <input type="hidden" name="Videos[@i].Id" value="@v.Id" />
+                    <div class="editor-grid-2"><label>Video title<input name="Videos[@i].Title" value="@v.Title" /></label><label>Order<input name="Videos[@i].SortOrder" type="number" min="1" value="@v.SortOrder" /></label></div>
+                    <label>YouTube URL<input name="Videos[@i].YouTubeUrl" value="@v.YouTubeUrl" data-youtube-url placeholder="https://www.youtube.com/watch?v=..." /></label>
+                    <label>Description<textarea name="Videos[@i].Description" rows="2" placeholder="What will students learn from this video?">@v.Description</textarea></label>
+                    <div class="video-editor-options"><label><input name="Videos[@i].IsRequired" type="checkbox" value="true" @(v.IsRequired?"checked":"") /> Required to complete lesson</label><label>XP<input name="Videos[@i].XpReward" type="number" min="0" max="1000" value="@v.XpReward" /></label><label><input name="Videos[@i].IsPublished" type="checkbox" value="true" @(v.IsPublished?"checked":"") /> Published</label></div>
+                    <div class="video-preview" data-video-preview>@if(!string.IsNullOrWhiteSpace(v.VideoId)){<iframe src="https://www.youtube.com/embed/@v.VideoId?rel=0&playsinline=1" title="@v.Title" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>}else{<span>Paste a YouTube URL to preview it here.</span>}</div>
+                    <div class="video-row-actions"><button type="button" class="small-btn video-up">↑</button><button type="button" class="small-btn video-down">↓</button><label class="delete-row"><input type="checkbox" name="Videos[@i].Delete" value="true" /> Delete</label></div>
+                </div>
+            }
+            </div>
+            <div class="editor-publish"><label><input asp-for="IsPublished" /> Publish lesson</label><span>Lesson XP: <b>@Model.XpReward</b></span></div>
+        </section>
+        <div class="lesson-save-bar"><a class="small-btn" asp-action="Curriculum">Cancel</a><button class="big-btn primary" type="submit">Save complete lesson →</button></div>
+    </form>
+</div>
+@section Scripts{<script src="~/js/lesson-editor.js" asp-append-version="true"></script>}

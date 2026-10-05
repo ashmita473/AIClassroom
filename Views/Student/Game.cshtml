@@ -1,13 +1,13 @@
-@model AIClassroom.Models.Game
+@model AIClassroom.Models.GamePlayViewModel
 @{
-    ViewData["Title"] = Model.Name;
-    var type = Model.GameType.ToUpperInvariant();
+    ViewData["Title"] = Model.Game.Name;
+    var type = Model.Game.GameType.ToUpperInvariant();
 }
-<section class="game-mission-page">
+<section class="game-mission-page" data-game-page>
     <a class="mission-back" asp-action="Games">← Back to Game Missions</a>
     <div class="mission-shell">
         <div class="mission-art-large">
-            <img src="~/images/games/@(Model.GameType switch {
+            <img src="~/images/games/@(Model.Game.GameType switch {
                 "classification"=>"classification.svg","pattern"=>"pattern.svg","sequence"=>"robot.svg","matching"=>"sensor.svg",
                 "logic"=>"chatbot.svg","maze"=>"maze.svg","flowchart"=>"flowchart.svg","creative"=>"creator.svg","data"=>"data.svg",
                 "training"=>"trainer.svg","accuracy"=>"accuracy.svg","ethics"=>"bias.svg","nlp"=>"nlp.svg","sentiment"=>"sentiment.svg",
@@ -15,10 +15,10 @@
         </div>
         <div class="mission-content">
             <span class="game-type">@type MISSION</span>
-            <h1>@Model.Name</h1>
-            <p>@Model.Description</p>
+            <h1>@Model.Game.Name</h1>
+            <p>@Model.Game.Description</p>
             <div class="mission-rewards">
-                <div><small>BASE REWARD</small><strong>+@Model.BaseXp XP</strong></div>
+                <div><small>BASE REWARD</small><strong>+@Model.Game.BaseXp XP</strong></div>
                 <div><small>PERFECT BONUS</small><strong>+100 XP</strong></div>
                 <div><small>BADGE</small><strong>Earn by mastering missions</strong></div>
             </div>
@@ -26,13 +26,32 @@
                 <span>ATTEMPTS: @(ViewBag.Attempts ?? 0)</span>
                 <span>BEST SCORE: @(ViewBag.BestScore ?? 0)%</span>
             </div>
-            <form method="post" asp-action="PlayGame">
+
+            <div class="game-engine" data-game-engine>
+                <div class="engine-progress"><span id="gameProgress">Question 1 of @Model.Questions.Count</span><div><i id="gameProgressBar"></i></div></div>
+                @for (var i = 0; i < Model.Questions.Count; i++)
+                {
+                    var q = Model.Questions[i];
+                    <section class="engine-question" data-question="@i" @(i == 0 ? "" : "hidden")>
+                        <div class="question-number">QUESTION @(i + 1)</div>
+                        <h2>@q.Prompt</h2>
+                        <div class="engine-options">
+                            @for (var j = 0; j < q.Options.Count; j++)
+                            {
+                                <label><input type="radio" name="Answers[@i]" value="@j"><span>@q.Options[j]</span></label>
+                            }
+                        </div>
+                        <button type="button" class="mission-next" data-next-question="@i">@(i == Model.Questions.Count - 1 ? "Finish Mission" : "Next Question") <span>→</span></button>
+                    </section>
+                }
+            </div>
+            <form id="gameForm" method="post" asp-action="PlayGame" hidden>
                 @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.Id">
-                <input type="hidden" name="score" value="100">
-                <button class="mission-start">START MISSION <span>→</span></button>
+                <input type="hidden" name="id" value="@Model.Game.Id">
+                @for (var i = 0; i < Model.Questions.Count; i++) { <input type="hidden" name="answers[@i]" id="answer_@i" value=""> }
             </form>
-            <p class="mission-note">This mission framework is ready for the interactive game logic. Your score and XP are recorded when the mission is completed.</p>
+            <p class="mission-note">Your score is calculated from the answers you give. The server validates the result, so the mission no longer accepts a fixed score.</p>
         </div>
     </div>
 </section>
+@section Scripts { <script src="~/js/game-engine.js" asp-append-version="true"></script> }

@@ -1,0 +1,4 @@
+@model AIClassroom.Models.CurriculumModuleEditViewModel
+<div class="editor-grid-3"><label>Group<select asp-for="GroupName"><option value="A">Group A</option><option value="B">Group B</option></select></label><label>Class minimum<input asp-for="ClassMin" type="number" min="3" max="8" /></label><label>Class maximum<input asp-for="ClassMax" type="number" min="3" max="8" /></label></div>
+<div class="editor-grid-2"><label>Module code<input asp-for="Code" maxlength="20" placeholder="A1" /></label><label>Sort order<input asp-for="SortOrder" type="number" min="0" /></label></div>
+<label>Module title<input asp-for="Title" maxlength="150" placeholder="What is AI" /></label>

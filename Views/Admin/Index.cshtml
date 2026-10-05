@@ -1,5 +1,92 @@
 @model AIClassroom.Models.AdminDashboardViewModel
-@{ViewData["Title"]="Teacher Dashboard";}
-<div class="dashboard-head"><div><div class="eyebrow">TEACHER CONTROL CENTER</div><h1>AI Classroom <span>🧑‍🏫</span></h1><p class="muted">Control lessons, students, games and live classroom missions.</p></div><div class="robot-card pixel"><span class="avatar">🤖</span><b>CONTROL MODE</b><small>Everything in one place</small></div></div>
-<div class="stat-grid"><div class="stat"><b>👨‍🎓 @Model.Students</b><span>Students</span></div><div class="stat"><b>👩‍🏫 @Model.Teachers</b><span>Teachers</span></div><div class="stat"><b>📚 @Model.PublishedLessons</b><span>Published days</span></div><div class="stat"><b>🎮 @Model.Games</b><span>Games</span></div><div class="stat"><b>🧪 @Model.Quizzes</b><span>Quizzes</span></div><div class="stat"><b>📝 @Model.Submissions</b><span>Submissions</span></div></div>
-<div class="admin-grid"><a class="admin-tile pixel" asp-action="Students"><span>👨‍🎓</span><h2>Students</h2><p>Add, search, filter and activate/deactivate students.</p></a><a class="admin-tile pixel" asp-action="Curriculum"><span>📚</span><h2>Curriculum</h2><p>View Group A/B days and unlock or lock content.</p></a><a class="admin-tile pixel" asp-action="Games"><span>🎮</span><h2>Games</h2><p>Manage the learning arcade.</p></a><a class="admin-tile pixel" asp-action="Quizzes"><span>🧪</span><h2>Quizzes</h2><p>Create and publish quiz shells.</p></a><a class="admin-tile pixel" asp-action="Assignments"><span>📋</span><h2>Assignments</h2><p>Create tasks and track submissions.</p></a><a class="admin-tile pixel" asp-action="Analytics"><span>📈</span><h2>Analytics</h2><p>See class performance and participation.</p></a><a class="admin-tile pixel" asp-action="Live"><span>📡</span><h2>Live Classroom</h2><p>Start a synchronized classroom mission.</p></a><a class="admin-tile pixel" asp-action="Announcements"><span>📢</span><h2>Announcements</h2><p>Send messages to students.</p></a></div>
+@{
+    ViewData["Title"] = "Teacher Dashboard";
+}
+
+<div class="teacher-dashboard">
+    <section class="teacher-hero">
+        <div class="teacher-hero-copy">
+            <div class="teacher-eyebrow">TEACHER CONTROL CENTER</div>
+            <h1>AI <span>Classroom</span> <img class="teacher-hero-badge" src="~/images/ui/robot.svg" alt="" /></h1>
+            <p>Control lessons, students, games and live classroom missions.</p>
+        </div>
+        <div class="teacher-hero-art" aria-hidden="true">
+            <img src="~/images/quiz-ui/take-hero.png" alt="" />
+            <div class="control-mode-card">
+                <img src="~/images/ui/robot.svg" alt="" />
+                <strong>CONTROL MODE</strong>
+                <span>Everything in one place</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="teacher-stats" aria-label="Classroom statistics">
+        <a class="teacher-stat stat-yellow" asp-controller="Admin" asp-action="Students">
+            <span class="stat-icon"><img src="~/images/ui/profile.svg" alt="" /></span>
+            <span><strong>@Model.Students</strong><small>Students</small></span>
+        </a>
+        <a class="teacher-stat stat-purple" asp-controller="Admin" asp-action="Teachers">
+            <span class="stat-icon"><img src="~/images/ui/profile.svg" alt="" /></span>
+            <span><strong>@Model.Teachers</strong><small>Teachers</small></span>
+        </a>
+        <a class="teacher-stat stat-blue" asp-controller="Admin" asp-action="Curriculum">
+            <span class="stat-icon"><img src="~/images/ui/book.svg" alt="" /></span>
+            <span><strong>@Model.PublishedLessons</strong><small>Published days</small></span>
+        </a>
+        <a class="teacher-stat stat-pink" asp-controller="Admin" asp-action="Games">
+            <span class="stat-icon"><img src="~/images/ui/game.svg" alt="" /></span>
+            <span><strong>@Model.Games</strong><small>Games</small></span>
+        </a>
+        <a class="teacher-stat stat-green" asp-controller="Admin" asp-action="Quizzes">
+            <span class="stat-icon"><img src="~/images/ui/quiz.svg" alt="" /></span>
+            <span><strong>@Model.Quizzes</strong><small>Quizzes</small></span>
+        </a>
+        <a class="teacher-stat stat-orange" asp-controller="Admin" asp-action="AssignmentSubmissions">
+            <span class="stat-icon"><img src="~/images/home/tasks.png" alt="" /></span>
+            <span><strong>@Model.Submissions</strong><small>Submissions</small></span>
+        </a>
+    </section>
+
+    <section class="teacher-tools" aria-label="Teacher tools">
+        <a class="teacher-tool tool-sky" asp-controller="Admin" asp-action="Students">
+            <span class="tool-art"><img src="~/images/ui/robot.svg" alt="" /></span>
+            <span class="tool-copy"><strong>Students</strong><small>Add, search, filter and<br />activate/deactivate students.</small></span>
+            <span class="tool-arrow">›</span>
+        </a>
+        <a class="teacher-tool tool-lavender" asp-controller="Admin" asp-action="Curriculum">
+            <span class="tool-art"><img src="~/images/ui/book.svg" alt="" /></span>
+            <span class="tool-copy"><strong>Curriculum</strong><small>View Group A/B days and<br />unlock or lock content.</small></span>
+            <span class="tool-arrow">›</span>
+        </a>
+        <a class="teacher-tool tool-gold" asp-controller="Admin" asp-action="Games">
+            <span class="tool-art"><img src="~/images/ui/game.svg" alt="" /></span>
+            <span class="tool-copy"><strong>Games</strong><small>Manage the learning<br />arcade.</small></span>
+            <span class="tool-arrow">›</span>
+        </a>
+        <a class="teacher-tool tool-pink" asp-controller="Admin" asp-action="Quizzes">
+            <span class="tool-art"><img src="~/images/ui/quiz.svg" alt="" /></span>
+            <span class="tool-copy"><strong>Quizzes</strong><small>Create and publish<br />quiz shells.</small></span>
+            <span class="tool-arrow">›</span>
+        </a>
+        <a class="teacher-tool tool-mint" asp-controller="Admin" asp-action="Assignments">
+            <span class="tool-art"><img src="~/images/home/tasks.png" alt="" /></span>
+            <span class="tool-copy"><strong>Assignments</strong><small>Create tasks and track<br />submissions.</small></span>
+            <span class="tool-arrow">›</span>
+        </a>
+        <a class="teacher-tool tool-lilac" asp-controller="Admin" asp-action="Analytics">
+            <span class="tool-art"><img src="~/images/ui/star.svg" alt="" /></span>
+            <span class="tool-copy"><strong>Analytics</strong><small>See class performance<br />and insights.</small></span>
+            <span class="tool-arrow">›</span>
+        </a>
+        <a class="teacher-tool tool-cyan" asp-controller="Admin" asp-action="Live">
+            <span class="tool-art"><img src="~/images/ui/robot.svg" alt="" /></span>
+            <span class="tool-copy"><strong>Live Classroom</strong><small>Start a synchronized<br />classroom session.</small></span>
+            <span class="tool-arrow">›</span>
+        </a>
+        <a class="teacher-tool tool-yellow" asp-controller="Admin" asp-action="Announcements">
+            <span class="tool-art"><img src="~/images/home/mission.png" alt="" /></span>
+            <span class="tool-copy"><strong>Announcements</strong><small>Send messages to<br />students.</small></span>
+            <span class="tool-arrow">›</span>
+        </a>
+    </section>
+</div>

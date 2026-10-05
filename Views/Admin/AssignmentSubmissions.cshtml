@@ -1,0 +1,10 @@
+@model List<AIClassroom.Models.AssignmentGradeViewModel>
+@{var a=ViewBag.Assignment as AIClassroom.Models.Assignment; ViewData["Title"]="Submissions";}
+<div class="assignment-page"><div class="assignment-wrap">
+  <a class="assignment-back" asp-action="Assignments">← Back to Assignments</a>
+  <div class="assignment-topbar submission-heading"><div><div class="assignment-eyebrow">SUBMISSION INBOX</div><h1>@a?.Title</h1><p>Review student work, give marks and leave helpful feedback.</p></div><span class="submission-count">@Model.Count submissions</span></div>
+  <div class="submission-list">
+  @foreach(var s in Model){<article class="submission-card"><div class="submission-student"><div class="submission-avatar">@s.StudentName.FirstOrDefault()</div><div><h3>@s.StudentName</h3><span>Submitted @s.SubmittedAtUtc.ToLocalTime().ToString("dd MMM yyyy · hh:mm tt")</span></div></div><div class="submission-preview">@s.Content</div><div class="submission-grade"><span class="grade-chip @(s.Marks.HasValue?"graded":"pending")">@(s.Marks.HasValue?$"{s.Marks}/100":"Needs review")</span>@if(!string.IsNullOrWhiteSpace(s.Feedback)){<span class="feedback-chip">Feedback added</span>}<a class="assignment-primary small" asp-action="GradeAssignment" asp-route-id="@s.SubmissionId">@(s.Marks.HasValue?"Edit grade":"Review & grade") →</a></div></article>}
+  @if(!Model.Any()){<div class="assignment-empty"><div class="assignment-empty-icon">✓</div><h3>No submissions yet</h3><p>Student submissions will appear here after they complete this assignment.</p></div>}
+  </div>
+</div></div>

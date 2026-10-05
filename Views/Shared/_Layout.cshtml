@@ -10,16 +10,73 @@
 <link rel="stylesheet" href="~/css/learn-world.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/games-arcade.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/quiz-test.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/student-notes.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/assignments.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/teacher-dashboard.css" asp-append-version="true" />
+@if (User.Identity?.IsAuthenticated == true && (User.IsInRole("SuperAdmin") || User.IsInRole("Teacher")))
+{
+    <link rel="stylesheet" href="~/css/teacher-ui.css" asp-append-version="true" />
+}
 </head>
 <body>
 @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Student"))
 {
     <main class="student-shell">@RenderBody()</main>
 }
+else if (User.Identity?.IsAuthenticated == true && (User.IsInRole("SuperAdmin") || User.IsInRole("Teacher")))
+{
+    <div class="teacher-shell">
+        @{
+            var teacherAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+            string Active(string key) => key switch
+            {
+                "Students" => teacherAction is "Students" or "AddStudent" or "ChangeStudentPin" ? "active" : "",
+                "Curriculum" => teacherAction is "Curriculum" or "AddModule" or "EditModule" or "AddDay" or "EditDay" or "EditLesson" ? "active" : "",
+                "Games" => teacherAction is "Games" or "AddGame" ? "active" : "",
+                "Quizzes" => teacherAction is "Quizzes" or "AddQuiz" or "QuizQuestions" or "AddQuestion" or "QuizResults" or "QuestionBank" ? "active" : "",
+                "Tests" => teacherAction is "Tests" or "AddTest" or "TestQuestions" or "TestResults" ? "active" : "",
+                "Assignments" => teacherAction is "Assignments" or "AddAssignment" or "EditAssignment" or "AssignmentSubmissions" or "GradeAssignment" ? "active" : "",
+                "Analytics" => teacherAction is "Analytics" ? "active" : "",
+                "Reports" => teacherAction is "Reports" ? "active" : "",
+                "Profile" => teacherAction is "Profile" or "ChangePassword" ? "active" : "",
+                _ => ""
+            };
+        }
+        <header class="teacher-topbar">
+            <a class="teacher-brand" asp-controller="Admin" asp-action="Index">AI CLASSROOM</a>
+            <nav class="teacher-nav" aria-label="Teacher navigation">
+                <a class="@(teacherAction == "Index" ? "active" : "")" asp-controller="Admin" asp-action="Index"><img src="~/images/ui/home.svg" alt="" />Dashboard</a>
+                <a class='@Active("Profile")' asp-controller="Admin" asp-action="Profile"><img src="~/images/ui/profile.svg" alt="" />My Profile</a>
+                <a class='@Active("Students")' asp-controller="Admin" asp-action="Students"><img src="~/images/ui/profile.svg" alt="" />Students</a>
+                <a class='@Active("Curriculum")' asp-controller="Admin" asp-action="Curriculum"><img src="~/images/ui/book.svg" alt="" />Curriculum</a>
+                <a class='@Active("Games")' asp-controller="Admin" asp-action="Games"><img src="~/images/ui/game.svg" alt="" />Games</a>
+                <a class='@Active("Quizzes")' asp-controller="Admin" asp-action="Quizzes"><img src="~/images/ui/quiz.svg" alt="" />Quizzes</a>
+                <a class='@Active("Tests")' asp-controller="Admin" asp-action="Tests"><img src="~/images/home/tests.png" alt="" />Tests</a>
+                <a class='@Active("Assignments")' asp-controller="Admin" asp-action="Assignments"><img src="~/images/home/tasks.png" alt="" />Assignments</a>
+                <a class='@Active("Analytics")' asp-controller="Admin" asp-action="Analytics"><img src="~/images/ui/star.svg" alt="" />Analytics</a>
+                <a class='@Active("Reports")' asp-controller="Admin" asp-action="Reports"><img src="~/images/ui/star.svg" alt="" />Reports</a>
+            </nav>
+            <div class="teacher-profile">
+                <a class="teacher-profile-link" asp-controller="Admin" asp-action="Profile" title="My Teacher Profile">
+                    @if (!string.IsNullOrWhiteSpace(User.FindFirst("ProfileImage")?.Value))
+                    {
+                        <img class="teacher-avatar" src="@User.FindFirst("ProfileImage")?.Value" alt="Teacher profile picture" />
+                    }
+                    else
+                    {
+                        <span class="teacher-avatar teacher-avatar-fallback">@((User.Identity?.Name ?? "T").Trim().FirstOrDefault().ToString().ToUpperInvariant())</span>
+                    }
+                </a>
+                <div class="teacher-profile-copy"><a class="teacher-profile-name" asp-controller="Admin" asp-action="Profile"><strong>@(User.Identity?.Name ?? "AI Classroom Admin")</strong><small>@(User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Teacher")</small></a><a class="teacher-logout" asp-controller="Admin" asp-action="ChangePassword">My Password</a></div>
+                <form method="post" asp-controller="Account" asp-action="Logout">@Html.AntiForgeryToken()<button type="submit" class="teacher-logout" style="background:none;border:0;padding:0;cursor:pointer">Logout ↪</button></form>
+            </div>
+        </header>
+        <main class="teacher-page">@RenderBody()</main>
+    </div>
+}
 else
 {
-    <header class="topbar"><a class="brand" asp-controller="Home" asp-action="Index"><span>AI CLASSROOM</span></a><div class="top-actions">@if(User.Identity?.IsAuthenticated==true){<span class="who">@User.Identity.Name</span><a class="small-btn" asp-controller="Account" asp-action="Logout">Logout</a>}else{<a class="small-btn" asp-controller="Account" asp-action="AdminLogin">Teacher</a><a class="small-btn primary" asp-controller="Account" asp-action="Login">Student</a>}</div></header>
-    @if(User.Identity?.IsAuthenticated==true && (User.IsInRole("SuperAdmin")||User.IsInRole("Teacher"))){<nav class="student-nav admin-nav"><a asp-controller="Admin" asp-action="Index">Dashboard</a><a asp-controller="Admin" asp-action="Students">Students</a><a asp-controller="Admin" asp-action="Curriculum">Curriculum</a><a asp-controller="Admin" asp-action="Games">Games</a><a asp-controller="Admin" asp-action="Quizzes">Quizzes</a><a asp-controller="Admin" asp-action="QuestionBank">Question Bank</a><a asp-controller="Admin" asp-action="Tests">Tests</a><a asp-controller="Admin" asp-action="Assignments">Assignments</a><a asp-controller="Admin" asp-action="Analytics">Analytics</a><a asp-controller="Admin" asp-action="Live">Live Class</a><a asp-controller="Admin" asp-action="Notes">Notes</a><a asp-controller="Admin" asp-action="Announcements">Messages</a><a asp-controller="Admin" asp-action="QuizResults">Quiz Results</a><a asp-controller="Admin" asp-action="TestResults">Test Results</a><a asp-controller="Admin" asp-action="Reports">Reports</a></nav>}
+    <header class="topbar"><a class="brand" asp-controller="Home" asp-action="Index"><span>AI CLASSROOM</span></a><div class="top-actions">@if(User.Identity?.IsAuthenticated==true){<span class="who">@User.Identity.Name</span><form class="logout-form" method="post" asp-controller="Account" asp-action="Logout">@Html.AntiForgeryToken()<button class="small-btn" type="submit">Logout</button></form>}else{<a class="small-btn" asp-controller="Account" asp-action="AdminLogin">Teacher</a><a class="small-btn primary" asp-controller="Account" asp-action="Login">Student</a>}</div></header>
     <main class="page">@RenderBody()</main>
 }
 <script src="~/js/site.js" asp-append-version="true"></script>@await RenderSectionAsync("Scripts", required:false)

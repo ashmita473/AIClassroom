@@ -1,0 +1,106 @@
+@model AIClassroom.Models.TeacherProfileViewModel
+@{
+    ViewData["Title"] = "My Teacher Profile";
+    var fallbackLetter = string.IsNullOrWhiteSpace(Model.Name) ? "T" : Model.Name.Trim().Substring(0, 1).ToUpperInvariant();
+}
+
+<div class="teacher-profile-page">
+    <div class="page-title">
+        <div>
+            <div class="eyebrow">MY TEACHER PROFILE</div>
+            <h1>Set up your profile</h1>
+            <p class="muted">Choose the name, picture and classroom details that students and teachers will see.</p>
+        </div>
+        <a class="small-btn" asp-action="Index">← Back to Dashboard</a>
+    </div>
+
+    @if (TempData["ProfileMessage"] is string message)
+    {
+        <div class="profile-success">✓ @message</div>
+    }
+
+    <div class="teacher-profile-layout">
+        <section class="teacher-profile-card profile-preview-card">
+            <div class="profile-card-label">PROFILE PREVIEW</div>
+            <div class="profile-preview-avatar">
+                @if (!string.IsNullOrWhiteSpace(Model.ProfileImagePath))
+                {
+                    <img src="@Model.ProfileImagePath" alt="Teacher profile picture" />
+                }
+                else
+                {
+                    <span>@fallbackLetter</span>
+                }
+            </div>
+            <h2>@(string.IsNullOrWhiteSpace(Model.Name) ? "Your Name" : Model.Name)</h2>
+            <div class="profile-role-pill">@Model.Role</div>
+            <p>@(string.IsNullOrWhiteSpace(Model.Department) ? "Add your department" : Model.Department)</p>
+            <small>@Model.Username</small>
+        </section>
+
+        <section class="teacher-profile-card">
+            <div class="profile-card-label">PROFILE DETAILS</div>
+            <form method="post" enctype="multipart/form-data" class="teacher-profile-form">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="profile-validation"></div>
+
+                <div class="profile-form-grid">
+                    <label>
+                        Display name
+                        <input asp-for="Name" maxlength="100" placeholder="e.g. Rahul Sharma" required />
+                        <span asp-validation-for="Name" class="field-error"></span>
+                    </label>
+                    <label>
+                        Username
+                        <input asp-for="Username" readonly />
+                        <small>Username is used for login and cannot be changed here.</small>
+                    </label>
+                    <label>
+                        Role
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <select asp-for="Role">
+                                <option value="Teacher">Teacher</option>
+                                <option value="SuperAdmin">SuperAdmin</option>
+                            </select>
+                            <small>SuperAdmin can manage the account role.</small>
+                        }
+                        else
+                        {
+                            <input value="@Model.Role" readonly />
+                            <input type="hidden" asp-for="Role" />
+                            <small>Your role is managed by SuperAdmin.</small>
+                        }
+                    </label>
+                    <label>
+                        Department
+                        <input asp-for="Department" maxlength="100" placeholder="e.g. AI / Computer Science" />
+                    </label>
+                </div>
+
+                <label>
+                    About you
+                    <textarea asp-for="Bio" maxlength="500" rows="4" placeholder="A short introduction for your teacher profile..."></textarea>
+                </label>
+
+                <div class="profile-upload-box">
+                    <div>
+                        <strong>Profile picture</strong>
+                        <p>Upload a PNG, JPG, JPEG or WebP image up to 2 MB.</p>
+                    </div>
+                    <label class="profile-upload-button">
+                        Choose picture
+                        <input asp-for="ProfileImage" type="file" accept="image/png,image/jpeg,image/webp" />
+                    </label>
+                </div>
+                <span asp-validation-for="ProfileImage" class="field-error"></span>
+
+                <div class="profile-actions">
+                    <a class="small-btn" asp-action="ChangePassword">Change Password</a>
+                    <button class="big-btn primary" type="submit">Save Profile</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>

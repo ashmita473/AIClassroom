@@ -4,10 +4,11 @@ using AIClassroom.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AIClassroom.Services;
 
 namespace AIClassroom.Controllers;
 [Authorize(Roles="Student")]
-public class StudentController(AppDbContext db) : Controller
+public class StudentController(AppDbContext db, GameChallengeService games) : Controller
 {
     int StudentId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     static bool CanAccessDay(CurriculumDay day, Student s) =>
@@ -26,13 +27,36 @@ public class StudentController(AppDbContext db) : Controller
     }
     [HttpGet] public async Task<IActionResult> Lesson(int id)
     {
-        var day = await db.CurriculumDays.Include(d=>d.Module).Include(d=>d.Lesson!).ThenInclude(l=>l.Activities).FirstOrDefaultAsync(d=>d.Id==id); if(day==null) return NotFound();
+        var day = await db.CurriculumDays.Include(d=>d.Module).Include(d=>d.Lesson!).ThenInclude(l=>l.Activities).Include(d=>d.Lesson!).ThenInclude(l=>l.Videos).FirstOrDefaultAsync(d=>d.Id==id); if(day==null) return NotFound();
         var s=await db.Students.FindAsync(StudentId); if(s==null || !CanAccessDay(day,s)) return Forbid();
+        var videoIds=day.Lesson?.Videos.Select(v=>v.Id).ToList() ?? new List<int>();
+        ViewBag.CompletedVideoIds=await db.StudentLessonVideoProgress.Where(x=>x.StudentId==s.Id && videoIds.Contains(x.LessonVideoId) && x.Completed).Select(x=>x.LessonVideoId).ToHashSetAsync();
         return View(day);
     }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CompleteLessonVideo(int videoId)
+    {
+        var video=await db.LessonVideos.Include(x=>x.Lesson!).ThenInclude(x=>x.CurriculumDay!).ThenInclude(x=>x.Module).FirstOrDefaultAsync(x=>x.Id==videoId && x.IsPublished);
+        var s=await db.Students.FindAsync(StudentId);
+        var day=video?.Lesson?.CurriculumDay;
+        if(video==null || s==null || day==null || !CanAccessDay(day,s)) return NotFound();
+        var progress=await db.StudentLessonVideoProgress.FirstOrDefaultAsync(x=>x.StudentId==s.Id && x.LessonVideoId==video.Id);
+        if(progress?.Completed==true) return Json(new { ok=true, already=true, xp=0 });
+        progress ??= new StudentLessonVideoProgress{StudentId=s.Id,LessonVideoId=video.Id};
+        progress.Completed=true; progress.CompletedAtUtc=DateTime.UtcNow;
+        if(progress.Id==0) db.StudentLessonVideoProgress.Add(progress);
+        var xp=Math.Max(0,video.XpReward);
+        if(xp>0){s.TotalXp+=xp;s.XpBalance+=xp;db.XpTransactions.Add(new XpTransaction{StudentId=s.Id,Points=xp,Reason=$"Watched lesson video: {video.Title}"});}
+        await db.SaveChangesAsync();
+        return Json(new { ok=true, already=false, xp });
+    }
+
     [HttpPost] [ValidateAntiForgeryToken] public async Task<IActionResult> CompleteLesson(int id)
     {
-        var day=await db.CurriculumDays.Include(d=>d.Module).FirstOrDefaultAsync(d=>d.Id==id); var s=await db.Students.FindAsync(StudentId); if(day==null||s==null) return NotFound(); if(!CanAccessDay(day,s)) return Forbid();
+        var day=await db.CurriculumDays.Include(d=>d.Module).Include(d=>d.Lesson!).ThenInclude(l=>l.Videos).FirstOrDefaultAsync(d=>d.Id==id); var s=await db.Students.FindAsync(StudentId); if(day==null||s==null) return NotFound(); if(!CanAccessDay(day,s)) return Forbid();
+        var requiredIds=day.Lesson?.Videos.Where(v=>v.IsPublished && v.IsRequired).Select(v=>v.Id).ToList() ?? new List<int>();
+        if(requiredIds.Count>0){var watched=await db.StudentLessonVideoProgress.Where(x=>x.StudentId==s.Id&&requiredIds.Contains(x.LessonVideoId)&&x.Completed).Select(x=>x.LessonVideoId).ToListAsync();if(watched.Count!=requiredIds.Count){TempData["LessonVideoRequired"]="Please watch all required lesson videos before completing this mission.";return RedirectToAction(nameof(Lesson),new{id});}}
         var p=await db.StudentProgress.FirstOrDefaultAsync(x=>x.StudentId==s.Id&&x.CurriculumDayId==id) ?? new StudentProgress{StudentId=s.Id,CurriculumDayId=id};
         if(p.Id==0){db.StudentProgress.Add(p);}
         if(!p.Completed){p.Completed=true;p.ProgressPercent=100;p.CompletedAtUtc=DateTime.UtcNow;s.TotalXp+=day.XpReward;s.XpBalance+=day.XpReward;db.XpTransactions.Add(new XpTransaction{StudentId=s.Id,Points=day.XpReward,Reason=$"Completed Day {day.DayNumber}: {day.Title}"});
@@ -42,10 +66,68 @@ public class StudentController(AppDbContext db) : Controller
             if(day.Title.Contains("Creative",StringComparison.OrdinalIgnoreCase)) await AwardBadge(s.Id,"AI Creator");}
         await db.SaveChangesAsync(); return RedirectToAction(nameof(Index));
     }
-    [HttpGet] public async Task<IActionResult> Notes(){ return View(await db.StudentNotes.Where(n=>n.StudentId==StudentId).OrderByDescending(n=>n.IsPinned).ThenByDescending(n=>n.UpdatedAtUtc).ToListAsync()); }
-    [HttpGet] public IActionResult NewNote(int? dayId=null)=>View(new NoteEditViewModel{CurriculumDayId=dayId});
-    [HttpPost] [ValidateAntiForgeryToken] public async Task<IActionResult> NewNote(NoteEditViewModel m){if(!ModelState.IsValid)return View(m);db.StudentNotes.Add(new StudentNote{StudentId=StudentId,CurriculumDayId=m.CurriculumDayId,Title=m.Title,Content=m.Content,IsPinned=m.IsPinned});await db.SaveChangesAsync();return RedirectToAction(nameof(Notes));}
-    [HttpPost] [ValidateAntiForgeryToken] public async Task<IActionResult> DeleteNote(int id){var n=await db.StudentNotes.FirstOrDefaultAsync(x=>x.Id==id&&x.StudentId==StudentId);if(n!=null){db.StudentNotes.Remove(n);await db.SaveChangesAsync();}return RedirectToAction(nameof(Notes));}
+    [HttpGet]
+    public async Task<IActionResult> Notes()
+    {
+        var notes = await db.StudentNotes.Where(n => n.StudentId == StudentId)
+            .OrderByDescending(n => n.IsPinned).ThenByDescending(n => n.UpdatedAtUtc).ToListAsync();
+        ViewBag.TeacherNotes = await db.TeacherNotes.OrderByDescending(x => x.Id).ToListAsync();
+        return View(notes);
+    }
+
+    [HttpGet]
+    public IActionResult NewNote(int? dayId = null) => View(new NoteEditViewModel { CurriculumDayId = dayId });
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> NewNote(NoteEditViewModel m)
+    {
+        if (!ModelState.IsValid) return View(m);
+        db.StudentNotes.Add(new StudentNote { StudentId = StudentId, CurriculumDayId = m.CurriculumDayId, Title = m.Title.Trim(), Content = m.Content.Trim(), IsPinned = m.IsPinned });
+        await db.SaveChangesAsync();
+        return RedirectToAction(nameof(Notes));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditNote(int id)
+    {
+        var n = await db.StudentNotes.FirstOrDefaultAsync(x => x.Id == id && x.StudentId == StudentId);
+        if (n == null) return NotFound();
+        return View(new NoteEditViewModel { Id = n.Id, CurriculumDayId = n.CurriculumDayId, Title = n.Title, Content = n.Content, IsPinned = n.IsPinned });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditNote(NoteEditViewModel m)
+    {
+        if (!ModelState.IsValid) return View(m);
+        var n = await db.StudentNotes.FirstOrDefaultAsync(x => x.Id == m.Id && x.StudentId == StudentId);
+        if (n == null) return NotFound();
+        n.Title = m.Title.Trim(); n.Content = m.Content.Trim(); n.IsPinned = m.IsPinned; n.UpdatedAtUtc = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return RedirectToAction(nameof(Notes));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PinNote(int id)
+    {
+        var n = await db.StudentNotes.FirstOrDefaultAsync(x => x.Id == id && x.StudentId == StudentId);
+        if (n == null) return NotFound();
+        n.IsPinned = !n.IsPinned; n.UpdatedAtUtc = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return RedirectToAction(nameof(Notes));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteNote(int id)
+    {
+        var n = await db.StudentNotes.FirstOrDefaultAsync(x => x.Id == id && x.StudentId == StudentId);
+        if (n != null) { db.StudentNotes.Remove(n); await db.SaveChangesAsync(); }
+        return RedirectToAction(nameof(Notes));
+    }
+
     [HttpGet] public async Task<IActionResult> Games()
     {
         var s = await db.Students.FindAsync(StudentId);
@@ -65,43 +147,61 @@ public class StudentController(AppDbContext db) : Controller
         var played = await db.GameResults.Where(x => x.StudentId == s.Id && x.GameId == g.Id).OrderByDescending(x => x.PlayedAtUtc).ToListAsync();
         ViewBag.Attempts = played.Count;
         ViewBag.BestScore = played.Count == 0 ? 0 : played.Max(x => x.Score);
-        return View(g);
+        // Seed is kept server-side for this attempt; the same shuffle is rebuilt when the answers are submitted.
+        var seed = Random.Shared.Next();
+        HttpContext.Session.SetInt32($"game:{g.Id}", seed);
+        var challenge = games.Create(g, seed);
+        return View(new GamePlayViewModel
+        {
+            Game = g,
+            Questions = challenge.Select(q => new GameChallengeQuestionViewModel { Prompt = q.Prompt, Options = q.Options.ToList() }).ToList()
+        });
     }
 
-    [HttpPost] [ValidateAntiForgeryToken] public async Task<IActionResult> PlayGame(int id,int score=80)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PlayGame(int id, List<int?>? answers)
     {
-        var s=await db.Students.FindAsync(StudentId);
-        var g=await db.Games.FirstOrDefaultAsync(x=>x.Id==id&&x.IsActive);
-        if(s==null||g==null||!InGroup(g.GroupName,s))return NotFound();
+        var s = await db.Students.FindAsync(StudentId);
+        var g = await db.Games.FirstOrDefaultAsync(x => x.Id == id && x.IsActive);
+        if (s == null || g == null || !InGroup(g.GroupName, s)) return NotFound();
 
-        var finalScore=Math.Clamp(score,0,100);
-        var completedXp=await db.ScoreSettings.Where(x=>x.Key=="GameCompleted").Select(x=>(int?)x.Points).FirstOrDefaultAsync() ?? 50;
-        var perfectXp=await db.ScoreSettings.Where(x=>x.Key=="PerfectGame").Select(x=>(int?)x.Points).FirstOrDefaultAsync() ?? 100;
-
-        // Anti-farming: XP is paid once per game for completing it, and once more when the student first reaches a perfect score.
-        // Replays are still recorded (attempts / best score) but earn no extra XP.
-        var previous=await db.GameResults.Where(x=>x.StudentId==s.Id&&x.GameId==g.Id).Select(x=>x.Score).ToListAsync();
-        var xp=0;
-        if(previous.Count==0) xp+=completedXp;
-        if(finalScore>=100 && !previous.Any(p=>p>=100)) xp+=perfectXp;
-
-        db.GameResults.Add(new GameResult{StudentId=s.Id,GameId=g.Id,Score=finalScore,XpEarned=xp});
-        if(xp>0)
+        var seed = HttpContext.Session.GetInt32($"game:{g.Id}");
+        if (seed == null)
         {
-            s.TotalXp+=xp;
-            s.XpBalance+=xp;
-            db.XpTransactions.Add(new XpTransaction{StudentId=s.Id,Points=xp,Reason=$"Completed game: {g.Name}"});
+            TempData["GameResult"] = "Please open the mission and start it before submitting.";
+            return RedirectToAction(nameof(Games));
+        }
+        HttpContext.Session.Remove($"game:{g.Id}"); // one submission per started attempt
+        var challenge = games.Create(g, seed.Value);
+        var finalScore = games.Score(answers ?? [], challenge, out _);
+        var configuredGameXp = await db.ScoreSettings.Where(x => x.Key == "GameCompleted").Select(x => (int?)x.Points).FirstOrDefaultAsync() ?? 50;
+        var completedXp = g.BaseXp > 0 ? g.BaseXp : configuredGameXp;
+        var perfectXp = await db.ScoreSettings.Where(x => x.Key == "PerfectGame").Select(x => (int?)x.Points).FirstOrDefaultAsync() ?? 100;
+
+        var previous = await db.GameResults.Where(x => x.StudentId == s.Id && x.GameId == g.Id).Select(x => x.Score).ToListAsync();
+        var xp = 0;
+        if (previous.Count == 0) xp += completedXp;
+        if (finalScore >= 100 && !previous.Any(p => p >= 100)) xp += perfectXp;
+
+        db.GameResults.Add(new GameResult { StudentId = s.Id, GameId = g.Id, Score = finalScore, XpEarned = xp });
+        if (xp > 0)
+        {
+            s.TotalXp += xp;
+            s.XpBalance += xp;
+            db.XpTransactions.Add(new XpTransaction { StudentId = s.Id, Points = xp, Reason = $"Completed game: {g.Name}" });
         }
 
-        await AwardBadge(s.Id,"First Game");
-        if(g.Name.Contains("Pattern",StringComparison.OrdinalIgnoreCase)) await AwardBadge(s.Id,"Pattern Detective");
-        if(g.Name.Contains("Robot",StringComparison.OrdinalIgnoreCase)) await AwardBadge(s.Id,"Robot Trainer");
-        if(finalScore>=100) await AwardBadge(s.Id,"Perfect Score");
+        await AwardBadge(s.Id, "First Game");
+        if (g.Name.Contains("Pattern", StringComparison.OrdinalIgnoreCase)) await AwardBadge(s.Id, "Pattern Detective");
+        if (g.Name.Contains("Robot", StringComparison.OrdinalIgnoreCase)) await AwardBadge(s.Id, "Robot Trainer");
+        if (finalScore >= 100) await AwardBadge(s.Id, "Perfect Score");
 
         await db.SaveChangesAsync();
-        TempData["GameResult"]=xp>0?$"{g.Name}: {finalScore}% — +{xp} XP":$"{g.Name}: {finalScore}% — replay (no extra XP)";
+        TempData["GameResult"] = xp > 0 ? $"{g.Name}: {finalScore}% — +{xp} XP" : $"{g.Name}: {finalScore}% — replay (no extra XP)";
         return RedirectToAction(nameof(Games));
     }
+
     [HttpGet]
     public async Task<IActionResult> Quizzes()
     {
@@ -387,8 +487,26 @@ public class StudentController(AppDbContext db) : Controller
 
     private static string Normalize(string value) =>
         string.Join(" ", value.Trim().ToLowerInvariant().Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
-    [HttpGet] public async Task<IActionResult> Assignments(){var s=await db.Students.FindAsync(StudentId);return View(await db.Assignments.Where(a=>a.IsPublished&&(a.GroupName==s!.GroupName||a.GroupName=="All")).OrderByDescending(a=>a.DueDateUtc).ToListAsync());}
-    [HttpGet] public async Task<IActionResult> SubmitAssignment(int id){var s=await db.Students.FindAsync(StudentId);var a=await db.Assignments.FirstOrDefaultAsync(x=>x.Id==id&&x.IsPublished);return a==null||s==null||!InGroup(a.GroupName,s)?NotFound():View(new AssignmentSubmitViewModel{AssignmentId=id});}
+    [HttpGet]
+    public async Task<IActionResult> Assignments()
+    {
+        var s=await db.Students.FindAsync(StudentId);
+        if(s==null) return RedirectToAction("Login","Account");
+        var assignments=await db.Assignments.Where(a=>a.IsPublished&&(a.GroupName==s.GroupName||a.GroupName=="All")).OrderBy(a=>a.DueDateUtc==null).ThenBy(a=>a.DueDateUtc).ThenByDescending(a=>a.Id).ToListAsync();
+        var submissions=await db.Submissions.Where(x=>x.StudentId==s.Id).ToDictionaryAsync(x=>x.AssignmentId);
+        ViewBag.Submissions=submissions;
+        return View(assignments);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SubmitAssignment(int id)
+    {
+        var s=await db.Students.FindAsync(StudentId);
+        var a=await db.Assignments.FirstOrDefaultAsync(x=>x.Id==id&&x.IsPublished);
+        if(a==null||s==null||!InGroup(a.GroupName,s))return NotFound();
+        var existing=await db.Submissions.FirstOrDefaultAsync(x=>x.AssignmentId==id&&x.StudentId==s.Id);
+        return View(new AssignmentSubmitViewModel{AssignmentId=id,Content=existing?.Content??""});
+    }
     [HttpPost] [ValidateAntiForgeryToken] public async Task<IActionResult> SubmitAssignment(AssignmentSubmitViewModel m)
     {
         var s=await db.Students.FindAsync(StudentId);
@@ -396,12 +514,13 @@ public class StudentController(AppDbContext db) : Controller
         if(a==null||s==null||!InGroup(a.GroupName,s))return NotFound();
         var content=(m.Content??"").Trim();
         if(content.Length==0||content.Length>10000){ModelState.AddModelError(nameof(m.Content),"Please write between 1 and 10,000 characters.");return View(m);}
-        // One XP-earning submission per assignment (prevents XP farming by resubmitting).
-        if(await db.Submissions.AnyAsync(x=>x.AssignmentId==a.Id&&x.StudentId==s.Id)){TempData["Result"]="You already submitted this mission.";return RedirectToAction(nameof(Assignments));}
+        var existing=await db.Submissions.FirstOrDefaultAsync(x=>x.AssignmentId==a.Id&&x.StudentId==s.Id);
+        if(existing!=null){ TempData["Result"]="This assignment has already been submitted. Your latest saved response is shown in the assignment status."; return RedirectToAction(nameof(Assignments)); }
         db.Submissions.Add(new Submission{AssignmentId=a.Id,StudentId=s.Id,Content=content});
         s.TotalXp+=a.XpReward;s.XpBalance+=a.XpReward;
         db.XpTransactions.Add(new XpTransaction{StudentId=s.Id,Points=a.XpReward,Reason=$"Assignment: {a.Title}"});
         await db.SaveChangesAsync();
+        TempData["Result"]="Assignment submitted successfully.";
         return RedirectToAction(nameof(Assignments));
     }
 

@@ -75,15 +75,6 @@
                 <button class="login-button" type="submit">LOG IN <span class="double-arrow">»</span></button>
             </form>
             <a class="role-back-link" href="/">← Back to “Who is it?”</a>
-        </main><script>
-        const pin = document.getElementById('Pin');
-        const toggle = document.getElementById('togglePin');
-        toggle.addEventListener('click', () => {
-            const visible = pin.type === 'text';
-            pin.type = visible ? 'password' : 'text';
-            toggle.classList.toggle('visible', !visible);
-            toggle.setAttribute('aria-label', visible ? 'Show PIN' : 'Hide PIN');
-        });
-</script>
+        </main><script src="~/js/login.js" asp-append-version="true"></script>
 </body>
 </html>

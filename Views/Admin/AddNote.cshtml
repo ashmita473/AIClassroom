@@ -1,2 +1,14 @@
-@model AIClassroom.Models.TeacherNote
-@{ViewData["Title"]="Add Teacher Note";}<div class="form-card pixel"><div class="eyebrow">TEACHER CONTENT</div><h1>📝 Add Note</h1><form method="post"><label>Title<input asp-for="Title" required/></label><label>Content<textarea asp-for="Content" rows="10" required></textarea></label><button class="big-btn primary">💾 Save Note</button></form></div>
+@model AIClassroom.Models.TeacherNoteEditViewModel
+@{ViewData["Title"]="Add Teacher Note";}
+<div class="admin-notes-page">
+ <div class="page-title"><div><div class="eyebrow">TEACHER CONTENT</div><h1>Publish a Teacher Note</h1><p class="muted">Choose a note type so students can find it quickly in their notebook.</p></div><a class="small-btn" asp-action="Notes">← Back to Notes</a></div>
+ <div class="teacher-editor pixel">
+  <div class="teacher-editor-intro"><img src="~/images/home/notes.png" alt="Notebook"><div class="eyebrow">CLASSROOM NOTE</div><h2>Teach it once.<br><span>Let students revisit it anytime.</span></h2><p>Use short, clear explanations, examples and revision reminders.</p></div>
+  <form method="post" class="teacher-editor-form">@Html.AntiForgeryToken()
+   <label>Note type<select asp-for="Category"><option>Pre-written</option><option>Lesson Notes</option><option>Important Points</option><option>Examples</option><option>Revision Notes</option></select></label>
+   <label>Title<input asp-for="Title" maxlength="200" required placeholder="e.g. What is Artificial Intelligence?"></label>
+   <label>Content<textarea asp-for="Content" rows="13" required placeholder="Write the note students should be able to revisit later..."></textarea></label>
+   <div class="editor-actions"><a class="notes-secondary" asp-action="Notes">Cancel</a><button class="notes-primary" type="submit">Publish Note →</button></div>
+  </form>
+ </div>
+</div>

@@ -1,2 +1,42 @@
 @model List<AIClassroom.Models.Assignment>
-@{ViewData["Title"]="Assignments";}<div class="page-title"><div><div class="eyebrow">CLASSROOM TASKS</div><h1>📚 Assignments</h1></div><a class="big-btn primary" asp-action="AddAssignment">+ Add Assignment</a></div><div class="quiz-list">@foreach(var a in Model){<article class="panel pixel"><span class="pill">@a.GroupName</span><h2>@a.Title</h2><p>@a.Instructions</p><small>+@a.XpReward XP · @(a.IsPublished?"Published":"Draft")</small></article>}</div>
+@using System.Collections.Generic
+@{
+    ViewData["Title"] = "Assignments";
+    var counts = ViewBag.SubmissionCounts as Dictionary<int,(int Count,int Graded)> ?? new();
+}
+<div class="assignment-page admin-assignment-page">
+  <div class="assignment-wrap">
+    <div class="assignment-topbar">
+      <div>
+        <div class="assignment-eyebrow">CLASSROOM MISSIONS</div>
+        <h1>Assignments</h1>
+        <p>Create meaningful tasks, set a deadline, reward XP and review every submission.</p>
+      </div>
+      <a class="assignment-primary" asp-action="AddAssignment">+ Create Assignment</a>
+    </div>
+    <section class="assignment-stats">
+      <div><strong>@Model.Count</strong><span>Total assignments</span></div>
+      <div><strong>@Model.Count(x=>x.IsPublished)</strong><span>Published</span></div>
+      <div><strong>@counts.Values.Sum(x=>x.Count)</strong><span>Submissions</span></div>
+      <div><strong>@counts.Values.Sum(x=>x.Graded)</strong><span>Graded</span></div>
+    </section>
+    <div class="assignment-section-head"><div><div class="assignment-eyebrow">TEACHER WORKSPACE</div><h2>Manage assignments</h2></div></div>
+    <div class="assignment-admin-grid">
+    @foreach(var a in Model){
+      var c=counts.TryGetValue(a.Id,out var value)?value:(0,0);
+      <article class="assignment-card admin-card">
+        <div class="assignment-card-top"><span class="assignment-badge">GROUP @a.GroupName</span><span class="assignment-status @(a.IsPublished?"published":"draft")">@(a.IsPublished?"Published":"Draft")</span></div>
+        <h3>@a.Title</h3><p>@a.Instructions</p>
+        <div class="assignment-meta"><span>+@a.XpReward XP</span><span>@(a.DueDateUtc.HasValue ? a.DueDateUtc.Value.ToLocalTime().ToString("dd MMM yyyy · hh:mm tt") : "No due date")</span></div>
+        <div class="submission-summary"><strong>@c.Item1</strong> submissions <span>·</span> <strong>@c.Item2</strong> graded</div>
+        <div class="assignment-actions">
+          <a class="assignment-secondary" asp-action="AssignmentSubmissions" asp-route-id="@a.Id">View submissions</a>
+          <a class="assignment-icon-btn" asp-action="EditAssignment" asp-route-id="@a.Id">Edit</a>
+          <form method="post" asp-action="DeleteAssignment" onsubmit="return confirm('Delete this assignment and its submissions?');">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@a.Id"/><button class="assignment-danger" type="submit">Delete</button></form>
+        </div>
+      </article>
+    }
+    @if(!Model.Any()){<div class="assignment-empty"><div class="assignment-empty-icon">✦</div><h3>No assignments yet</h3><p>Create your first classroom mission for students.</p><a class="assignment-primary" asp-action="AddAssignment">Create Assignment</a></div>}
+    </div>
+  </div>
+</div>

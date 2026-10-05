@@ -1,0 +1,7 @@
+@model List<AIClassroom.Models.Teacher>
+@{ ViewData["Title"] = "Teachers"; }
+<div class="dashboard-head"><div><div class="eyebrow">TEACHER MANAGEMENT</div><h1>Teacher Accounts</h1><p class="muted">Manage teacher accounts and password access. Each teacher can maintain their own profile picture and details.</p></div><a class="big-btn primary" asp-action="Profile">My Profile</a></div>
+@if(TempData["SecurityMessage"] is string msg){<div class="alert alert-success">@msg</div>}
+<div class="panel pixel"><table class="table"><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody>
+@foreach(var t in Model){<tr><td>@t.Name</td><td>@t.Username</td><td>@t.Role</td><td>@(t.IsActive ? "Active" : "Disabled")</td><td><a class="small-btn" asp-action="ResetTeacherPassword" asp-route-id="@t.Id">Reset Password</a></td></tr>}
+</tbody></table></div>

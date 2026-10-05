@@ -63,7 +63,7 @@ Implemented in the existing AI Classroom ASP.NET Core MVC project.
 - XP history
 
 ## Database note
-This project uses `Database.EnsureCreatedAsync()` for the current development workflow. Because this stage adds new columns/tables, recreate the development database once before running the application.
+This project now uses `Database.MigrateAsync()`. The initial migration creates the schema for a new database and safely skips creation for tables that already exist.
 
 From the folder containing `AIClassroom.csproj`:
 

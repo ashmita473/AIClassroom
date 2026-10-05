@@ -17,6 +17,7 @@ public class CurriculumController(AppDbContext db) : Controller
             var s=await db.Students.FindAsync(int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value));
             if(s==null||d.Module==null||!d.IsPublished||d.IsLocked||d.Module.GroupName!=s.GroupName||d.Module.ClassMin>s.ClassNumber||d.Module.ClassMax<s.ClassNumber)return Forbid();
         }
+        if(User.IsInRole("Student")) return RedirectToAction("Lesson", "Student", new { id = d.Id });
         return View(d);
     }
 }

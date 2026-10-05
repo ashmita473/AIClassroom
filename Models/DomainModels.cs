@@ -9,6 +9,9 @@ public class Teacher
     [MaxLength(50)] public string Username { get; set; } = "";
     public string PasswordHash { get; set; } = "";
     [MaxLength(30)] public string Role { get; set; } = "Teacher";
+    [MaxLength(500)] public string ProfileImagePath { get; set; } = "";
+    [MaxLength(100)] public string Department { get; set; } = "";
+    [MaxLength(500)] public string Bio { get; set; } = "";
     public bool IsActive { get; set; } = true;
 }
 
@@ -67,6 +70,7 @@ public class Lesson
     public string StudentNotesTemplate { get; set; } = "";
     public bool IsPublished { get; set; }
     public ICollection<Activity> Activities { get; set; } = new List<Activity>();
+    public ICollection<LessonVideo> Videos { get; set; } = new List<LessonVideo>();
 }
 
 public class Activity
@@ -79,6 +83,31 @@ public class Activity
     public string Content { get; set; } = "";
     public int SortOrder { get; set; }
     public int XpReward { get; set; } = 10;
+}
+
+public class LessonVideo
+{
+    public int Id { get; set; }
+    public int LessonId { get; set; }
+    public Lesson? Lesson { get; set; }
+    [MaxLength(200)] public string Title { get; set; } = "";
+    [MaxLength(1000)] public string Description { get; set; } = "";
+    [MaxLength(20)] public string YouTubeVideoId { get; set; } = "";
+    public int SortOrder { get; set; }
+    public bool IsRequired { get; set; }
+    public int XpReward { get; set; }
+    public bool IsPublished { get; set; } = true;
+}
+
+public class StudentLessonVideoProgress
+{
+    public int Id { get; set; }
+    public int StudentId { get; set; }
+    public Student? Student { get; set; }
+    public int LessonVideoId { get; set; }
+    public LessonVideo? LessonVideo { get; set; }
+    public bool Completed { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
 }
 
 public class Game
@@ -223,7 +252,9 @@ public class Submission
 {
     public int Id { get; set; }
     public int AssignmentId { get; set; }
+    public Assignment? Assignment { get; set; }
     public int StudentId { get; set; }
+    public Student? Student { get; set; }
     public string Content { get; set; } = "";
     public int? Marks { get; set; }
     public string? Feedback { get; set; }

@@ -1,2 +1,24 @@
 @model AIClassroom.Models.NoteEditViewModel
-@{ViewData["Title"]="New Note";}<div class="form-card pixel"><div class="eyebrow">STUDENT NOTES</div><h1>📝 Create a note</h1><form method="post"><input type="hidden" asp-for="CurriculumDayId"/><label>Title<input asp-for="Title" required placeholder="e.g. What I learned about AI"/></label><label>Notes<textarea asp-for="Content" rows="10" required placeholder="Write in your own words..."></textarea></label><label class="check"><input asp-for="IsPinned"/> Pin this note</label><button class="big-btn primary">💾 Save Note</button></form></div>
+@{ ViewData["Title"] = "Create Note"; }
+<div class="notes-page">
+ <div class="notes-wrap">
+  <header class="notes-header compact-notes-header">
+   <a class="notes-brand" asp-controller="Student" asp-action="Index"><span class="brand-ai">AI</span><span class="brand-classroom">CLASSROOM</span></a>
+   <nav class="notes-nav"><a asp-controller="Student" asp-action="Index"><img src="~/images/ui/home.svg" alt="">Home</a><a asp-controller="Curriculum" asp-action="Index"><img src="~/images/ui/book.svg" alt="">Learn</a><a asp-controller="Student" asp-action="Games"><img src="~/images/ui/game.svg" alt="">Games</a><a asp-controller="Student" asp-action="Quizzes"><img src="~/images/ui/quiz.svg" alt="">Quizzes</a><a asp-controller="Test" asp-action="Index"><img src="~/images/home/tests.png" alt="">Tests</a></nav>
+   <a class="notes-back" asp-action="Notes">← Back to Notes</a>
+  </header>
+  <section class="note-editor-page">
+   <div class="note-editor-art"><img src="~/images/home/notes.png" alt="Notebook"><div class="notes-eyebrow">MY LEARNING LOG</div><h1>Capture a <span>great idea.</span></h1><p>Write it in your own words. Pinned notes stay easy to find when you revise.</p></div>
+   <div class="note-editor-card">
+    <div class="notes-eyebrow">NEW STUDENT NOTE</div><h2>Create a note</h2>
+    <form method="post">
+      @Html.AntiForgeryToken()<input type="hidden" asp-for="CurriculumDayId" />
+      <label>Note title<input asp-for="Title" required maxlength="200" placeholder="e.g. What I learned about AI"></label>
+      <label>Your notes<textarea asp-for="Content" rows="12" required placeholder="Write the important idea in your own words..."></textarea></label>
+      <label class="note-pin-check"><input asp-for="IsPinned"> <span>Pin this note so it stays at the top</span></label>
+      <div class="editor-actions"><a class="notes-secondary" asp-action="Notes">Cancel</a><button class="notes-primary" type="submit">Save Note →</button></div>
+    </form>
+   </div>
+  </section>
+ </div>
+</div>

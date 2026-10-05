@@ -1,0 +1,24 @@
+@model AIClassroom.Models.NoteEditViewModel
+@{ ViewData["Title"] = "Edit Note"; }
+<div class="notes-page">
+ <div class="notes-wrap">
+  <header class="notes-header compact-notes-header">
+   <a class="notes-brand" asp-controller="Student" asp-action="Index"><span class="brand-ai">AI</span><span class="brand-classroom">CLASSROOM</span></a>
+   <nav class="notes-nav"><a asp-controller="Student" asp-action="Index"><img src="~/images/ui/home.svg" alt="">Home</a><a asp-controller="Curriculum" asp-action="Index"><img src="~/images/ui/book.svg" alt="">Learn</a><a asp-controller="Student" asp-action="Games"><img src="~/images/ui/game.svg" alt="">Games</a><a asp-controller="Student" asp-action="Quizzes"><img src="~/images/ui/quiz.svg" alt="">Quizzes</a><a asp-controller="Test" asp-action="Index"><img src="~/images/home/tests.png" alt="">Tests</a></nav>
+   <a class="notes-back" asp-action="Notes">← Back to Notes</a>
+  </header>
+  <section class="note-editor-page">
+   <div class="note-editor-art"><img src="~/images/home/notes.png" alt="Notebook"><div class="notes-eyebrow">MY LEARNING LOG</div><h1>Make your note <span>even better.</span></h1><p>Update your idea, add details, and pin it if you'll need it again.</p></div>
+   <div class="note-editor-card">
+    <div class="notes-eyebrow">EDIT STUDENT NOTE</div><h2>Edit note</h2>
+    <form method="post">
+      @Html.AntiForgeryToken()<input type="hidden" asp-for="Id" /><input type="hidden" asp-for="CurriculumDayId" />
+      <label>Note title<input asp-for="Title" required maxlength="200"></label>
+      <label>Your notes<textarea asp-for="Content" rows="12" required></textarea></label>
+      <label class="note-pin-check"><input asp-for="IsPinned"> <span>Keep this note pinned</span></label>
+      <div class="editor-actions"><a class="notes-secondary" asp-action="Notes">Cancel</a><button class="notes-primary" type="submit">Save Changes →</button></div>
+    </form>
+   </div>
+  </section>
+ </div>
+</div>

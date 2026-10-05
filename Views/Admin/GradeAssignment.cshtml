@@ -1,0 +1,6 @@
+@model AIClassroom.Models.AssignmentGradeViewModel
+@{ViewData["Title"]="Grade Assignment";}
+<div class="assignment-page"><div class="assignment-wrap"><a class="assignment-back" asp-action="AssignmentSubmissions" asp-route-id="@ViewBag.AssignmentId">← Back to submissions</a>
+<section class="grade-shell"><div class="grade-content"><div class="assignment-eyebrow">STUDENT SUBMISSION</div><h1>@Model.StudentName</h1><p class="grade-assignment-title">@Model.AssignmentTitle</p><div class="submitted-time">Submitted @Model.SubmittedAtUtc.ToLocalTime().ToString("dd MMM yyyy · hh:mm tt")</div><div class="student-work">@Model.Content</div></div>
+<form method="post" class="grade-form">@Html.AntiForgeryToken()<input type="hidden" asp-for="SubmissionId"/><div class="assignment-eyebrow">TEACHER REVIEW</div><h2>Give feedback</h2><label>Marks out of 100<input asp-for="Marks" type="number" min="0" max="100" placeholder="e.g. 85"/></label><span asp-validation-for="Marks"></span><label>Feedback<textarea asp-for="Feedback" rows="10" placeholder="Tell the student what they did well and what they can improve..."></textarea></label><div class="assignment-form-actions"><a class="assignment-secondary" asp-action="Assignments">Cancel</a><button class="assignment-primary" type="submit">Save Review →</button></div></form></section>
+</div></div>

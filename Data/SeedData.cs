@@ -126,18 +126,57 @@ public static class SeedData
             await db.SaveChangesAsync();
         }
 
-        if (!await db.Tests.AnyAsync())
+        // Seed the four assessment tracks. Existing tests are preserved; missing test types are added once.
+        async Task AddTestIfMissing(string group, string type, string title, int minutes, params (string Prompt, (string Text, bool Correct)[] Options)[] questions)
         {
-            var testA = new Test { Title = "Group A AI Revision Test", TestType = "Revision", GroupName = "A", TimeLimitMinutes = 15, PassingScore = 60, IsPublished = true };
-            testA.Questions.Add(Q("Which is an example of AI in daily life?", new[] { ("Face unlock", true), ("A plain chair", false), ("A pencil", false), ("A wall", false) }));
-            testA.Questions.Add(Q("What is an algorithm?", new[] { ("Step-by-step instructions", true), ("A color", false), ("A sensor", false), ("A battery", false) }));
-            var testB = new Test { Title = "Group B AI + ML Revision Test", TestType = "Revision", GroupName = "B", TimeLimitMinutes = 15, PassingScore = 60, IsPublished = true };
-            testB.Questions.Add(Q("Which ML type learns with labeled examples?", new[] { ("Supervised", true), ("Unsupervised", false), ("Reinforcement", false), ("Random", false) }));
-            testB.Questions.Add(Q("Accuracy compares correct predictions with...", new[] { ("Total predictions", true), ("Screen size", false), ("Pixel color", false), ("Keyboard speed", false) }));
-            db.Tests.AddRange(testA, testB);
+            if (await db.Tests.AnyAsync(t => t.GroupName == group && t.TestType == type)) return;
+            var test = new Test
+            {
+                Title = title,
+                TestType = type,
+                GroupName = group,
+                TimeLimitMinutes = minutes,
+                PassingScore = 60,
+                IsPublished = true,
+                RandomizeQuestions = true
+            };
+            foreach (var q in questions) test.Questions.Add(Q(q.Prompt, q.Options));
+            db.Tests.Add(test);
             await db.SaveChangesAsync();
         }
 
+        await AddTestIfMissing("A", "Unit", "Group A · AI Basics Unit Test", 12,
+            ("What is AI designed to do?", new[] { ("Perform tasks that can require intelligence", true), ("Only store files", false), ("Only print pages", false), ("Only play music", false) }),
+            ("Which is an AI example?", new[] { ("Face unlock", true), ("A wooden desk", false), ("A pencil", false), ("A plain chair", false) }));
+        await AddTestIfMissing("B", "Unit", "Group B · AI + ML Unit Test", 15,
+            ("Machine learning learns patterns mainly from...", new[] { ("Data", true), ("Desk size", false), ("Screen brightness", false), ("Keyboard color", false) }),
+            ("Which is a supervised learning example?", new[] { ("Learning from labelled examples", true), ("Guessing without data", false), ("Turning off a computer", false), ("Formatting a drive", false) }));
+
+        await AddTestIfMissing("A", "Module", "Group A · AI Foundations Module Test", 18,
+            ("An algorithm is best described as...", new[] { ("A step-by-step procedure", true), ("A picture filter", false), ("A battery type", false), ("A computer cable", false) }),
+            ("A sensor helps a system...", new[] { ("Collect information from the environment", true), ("Delete every file", false), ("Increase screen size", false), ("Print automatically", false) }),
+            ("Classification means...", new[] { ("Putting examples into categories", true), ("Making a screen brighter", false), ("Typing faster", false), ("Saving a password", false) }));
+        await AddTestIfMissing("B", "Module", "Group B · Machine Learning Module Test", 20,
+            ("What is a dataset?", new[] { ("A collection of examples or records", true), ("A monitor cable", false), ("A keyboard shortcut", false), ("A game controller", false) }),
+            ("Accuracy measures...", new[] { ("How many predictions are correct", true), ("How large a model looks", false), ("How bright a screen is", false), ("How fast a keyboard types", false) }),
+            ("Bias can happen when training data is...", new[] { ("Unbalanced or unfairly represented", true), ("Stored on a computer", false), ("Written in a table", false), ("Saved as a file", false) }));
+
+        await AddTestIfMissing("A", "Final", "Group A · AI Classroom Final Assessment", 25,
+            ("Which sequence best describes a simple AI workflow?", new[] { ("Data → model → prediction", true), ("Chair → pencil → book", false), ("Screen → cable → desk", false), ("Mouse → paper → lamp", false) }),
+            ("Why should we check AI results?", new[] { ("AI can make mistakes or biased decisions", true), ("AI is always perfect", false), ("AI never uses data", false), ("AI cannot process information", false) }),
+            ("A flowchart is useful for showing...", new[] { ("Steps and decisions", true), ("Only colors", false), ("Only passwords", false), ("Only pictures", false) }));
+        await AddTestIfMissing("B", "Final", "Group B · AI + ML Final Assessment", 30,
+            ("Which statement about a trained model is correct?", new[] { ("It uses learned patterns to make predictions", true), ("It never needs data", false), ("It is always correct", false), ("It only stores images", false) }),
+            ("What should a responsible AI builder check?", new[] { ("Accuracy, fairness and suitable data", true), ("Only screen color", false), ("Only speed", false), ("Only file size", false) }),
+            ("NLP is mainly about working with...", new[] { ("Human language", true), ("Battery voltage", false), ("Screen pixels only", false), ("Computer cases", false) }));
+
+        // Keep the original revision tests as the revision track when the database is first created.
+        await AddTestIfMissing("A", "Revision", "Group A · AI Revision Test", 15,
+            ("Which is an example of AI in daily life?", new[] { ("Face unlock", true), ("A plain chair", false), ("A pencil", false), ("A wall", false) }),
+            ("What is an algorithm?", new[] { ("Step-by-step instructions", true), ("A color", false), ("A sensor", false), ("A battery", false) }));
+        await AddTestIfMissing("B", "Revision", "Group B · AI + ML Revision Test", 15,
+            ("Which ML type learns with labeled examples?", new[] { ("Supervised", true), ("Unsupervised", false), ("Reinforcement", false), ("Random", false) }),
+            ("Accuracy compares correct predictions with...", new[] { ("Total predictions", true), ("Screen size", false), ("Pixel color", false), ("Keyboard speed", false) }));
 
         if (!await db.CharacterItems.AnyAsync())
         {

@@ -1,0 +1,16 @@
+@model AIClassroom.Models.AssignmentEditViewModel
+@{ViewData["Title"] = "Edit Assignment";}
+<div class="assignment-page assignment-editor-page"><div class="assignment-wrap">
+  <a class="assignment-back" asp-action="Assignments">← Back to Assignments</a>
+  <section class="assignment-editor-shell compact-editor">
+    <div class="assignment-editor-hero"><div class="assignment-eyebrow">EDIT CLASSROOM MISSION</div><h1>Update the<br/><span>assignment.</span></h1><p>Changes are visible to students the next time they open the assignment.</p></div>
+    <form method="post" class="assignment-form">@Html.AntiForgeryToken()<input type="hidden" asp-for="Id"/>
+      <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+      <label>Assignment title<input asp-for="Title" required/><span asp-validation-for="Title"></span></label>
+      <label>Instructions<textarea asp-for="Instructions" rows="9" required></textarea><span asp-validation-for="Instructions"></span></label>
+      <div class="assignment-form-grid"><label>Student group<select asp-for="GroupName"><option value="A">Group A</option><option value="B">Group B</option><option value="All">All groups</option></select></label><label>XP reward<input asp-for="XpReward" type="number" min="0" max="1000"/></label><label>Due date<input asp-for="DueDateUtc" type="datetime-local"/></label></div>
+      <label class="assignment-publish"><input asp-for="IsPublished"/> Published for students</label>
+      <div class="assignment-form-actions"><a class="assignment-secondary" asp-action="Assignments">Cancel</a><button class="assignment-primary" type="submit">Save Changes →</button></div>
+    </form>
+  </section>
+</div></div>

@@ -1,8 +1,106 @@
 @model List<AIClassroom.Models.Test>
-@{ ViewData["Title"]="Tests"; }
-<div class="assess-shell"><div class="assess-wrap">
-<header class="assess-top"><a class="assess-brand" asp-controller="Student" asp-action="Index"><span>AI</span> CLASSROOM</a><nav class="assess-nav"><a asp-controller="Student" asp-action="Index">Home</a><a asp-controller="Curriculum" asp-action="Index">Learn</a><a asp-controller="Student" asp-action="Games">Games</a><a asp-controller="Student" asp-action="Quizzes">Quizzes</a><a class="active" asp-controller="Test" asp-action="Index">Tests</a></nav></header>
-<section class="assess-hero"><div class="assess-eyebrow">ASSESSMENT LAB</div><h1>Tests & Assessments</h1><p>Separate assessments for unit tests, module tests, revision tests and final assessment.</p></section>
-<div class="assess-grid">
-@foreach(var t in Model){<article class="assess-card"><div class="assess-eyebrow">@t.TestType.ToUpper() TEST · @t.GroupName</div><h2>@t.Title</h2><p>Results include score, percentage, correct, wrong, skipped, time taken and topic performance.</p><div class="assess-meta"><span class="assess-pill">@t.Questions.Count questions</span><span class="assess-pill">@t.TimeLimitMinutes min</span><span class="assess-pill">Pass @t.PassingScore%</span></div><div class="assess-actions"><a class="assess-btn" asp-action="Take" asp-route-id="@t.Id">Start Test →</a></div></article>}
-</div></div></div>
+@using System.Linq
+@{
+    ViewData["Title"] = "Tests & Assessments";
+    var attempts = ViewBag.Attempts;
+    var displayName = User.Identity?.Name;
+    var avatar = "/images/character/base-boy-reference-proportions.png";
+    var types = new[]
+    {
+        new { Key = "Unit", Label = "Unit Tests", Short = "Check what you learned in one unit.", Icon = "unit", Tone = "blue", Image = "/images/home/tests.png" },
+        new { Key = "Module", Label = "Module Tests", Short = "Bring several lessons together.", Icon = "module", Tone = "violet", Image = "/images/home/learn.png" },
+        new { Key = "Revision", Label = "Revision Tests", Short = "Practice before the big assessment.", Icon = "revision", Tone = "gold", Image = "/images/home/rank.png" },
+        new { Key = "Final", Label = "Final Assessment", Short = "Show what you know across the course.", Icon = "final", Tone = "mint", Image = "/images/home/mission.png" }
+    };
+}
+
+<div class="test-page">
+    <div class="test-wrap">
+        <header class="test-header">
+            <a class="test-brand" asp-controller="Student" asp-action="Index" aria-label="AI Classroom home">
+                <span class="brand-ai">AI</span><span class="brand-classroom">CLASSROOM</span>
+            </a>
+            <nav class="test-nav" aria-label="Student navigation">
+                <a asp-controller="Student" asp-action="Index"><img src="~/images/ui/home.svg" alt="">Home</a>
+                <a asp-controller="Curriculum" asp-action="Index"><img src="~/images/ui/book.svg" alt="">Learn</a>
+                <a asp-controller="Student" asp-action="Games"><img src="~/images/ui/game.svg" alt="">Games</a>
+                <a asp-controller="Student" asp-action="Quizzes"><img src="~/images/ui/quiz.svg" alt="">Quizzes</a>
+                <a class="active" asp-controller="Test" asp-action="Index"><img src="~/images/home/tests.png" alt="">Tests</a>
+            </nav>
+            <div class="test-profile">
+                <span class="test-star"><img src="~/images/ui/star.svg" alt=""></span>
+                <img class="test-avatar" src="@avatar" alt="Student avatar">
+                <span>@displayName</span><span class="profile-chevron">⌄</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="test-hero">
+                <div class="test-hero-copy">
+                    <div class="test-eyebrow">ASSESSMENT LAB</div>
+                    <h1>Ready to show <span>what you know?</span></h1>
+                    <p>Tests are bigger than quick quizzes. Complete unit tests, module tests, revision tests and the final assessment to track your real learning progress.</p>
+                    <div class="test-hero-pills">
+                        <span><b>▣</b> Separate from Quizzes</span>
+                        <span><b>▥</b> Detailed Results</span>
+                        <span><b>★</b> Earn XP</span>
+                    </div>
+                </div>
+                <div class="test-hero-art" aria-hidden="true">
+                    <img src="~/images/quiz-ui/take-hero.png" alt="" class="test-hero-robot">
+                    <span class="floating-star fs1">★</span><span class="floating-star fs2">★</span><span class="floating-star fs3">✦</span>
+                </div>
+            </section>
+
+            <section class="test-path" aria-labelledby="test-path-title">
+                <div class="section-heading">
+                    <div><div class="test-eyebrow">YOUR TEST PATH</div><h2 id="test-path-title">Four ways to prove <span>your progress</span></h2></div>
+                    <span class="test-count">@Model.Count published tests</span>
+                </div>
+                <div class="test-type-grid">
+                    @foreach (var type in types)
+                    {
+                        var count = Model.Count(t => string.Equals(t.TestType, type.Key, StringComparison.OrdinalIgnoreCase));
+                        <button type="button" class="test-type-card @type.Tone" data-filter="@type.Key">
+                            <span class="type-icon"><img src="@type.Image" alt=""></span>
+                            <span class="type-copy"><strong>@type.Label</strong><small>@type.Short</small></span>
+                            <span class="type-count">@count</span>
+                            <span class="type-arrow">→</span>
+                        </button>
+                    }
+                </div>
+            </section>
+
+            <section class="available-tests" aria-labelledby="available-tests-title">
+                <div class="section-heading available-heading">
+                    <div><div class="test-eyebrow">AVAILABLE NOW</div><h2 id="available-tests-title">Choose a <span>test</span></h2><p>Take your time, answer carefully and check your results when you finish.</p></div>
+                    <div class="test-filters" role="group" aria-label="Filter tests">
+                        <button class="filter-btn active" type="button" data-filter="All">All</button><button class="filter-btn" type="button" data-filter="Unit">Unit</button><button class="filter-btn" type="button" data-filter="Module">Module</button><button class="filter-btn" type="button" data-filter="Revision">Revision</button><button class="filter-btn" type="button" data-filter="Final">Final</button>
+                    </div>
+                </div>
+                @if (!Model.Any())
+                {
+                    <div class="test-empty"><div class="empty-icon">★</div><h3>No tests are published yet</h3><p>Your teacher will publish the next assessment here.</p></div>
+                }
+                else
+                {
+                    <div class="test-list" id="testList">
+                        @foreach (var t in Model)
+                        {
+                            var hasAttempt = attempts != null && attempts.ContainsKey(t.Id);
+                            var best = hasAttempt ? Convert.ToInt32(attempts[t.Id].Best) : 0;
+                            var attemptCount = hasAttempt ? Convert.ToInt32(attempts[t.Id].Count) : 0;
+                            var typeClass = (t.TestType ?? "Unit").ToLowerInvariant();
+                            <article class="test-card" data-test-type="@t.TestType">
+                                <div class="test-card-icon @typeClass"><img src="@(typeClass == "final" ? "/images/ui/star.svg" : typeClass == "revision" ? "/images/home/rank.png" : typeClass == "module" ? "/images/home/learn.png" : "/images/home/tests.png")" alt=""></div>
+                                <div class="test-card-main"><div class="test-card-topline"><span class="test-type-label">@t.TestType TEST</span><span class="group-label">GROUP @t.GroupName</span></div><h3>@t.Title</h3><p>Results include score, percentage, correct, wrong, skipped, time taken and topic performance.</p><div class="test-meta"><span><b>@t.Questions.Count</b> questions</span><span><b>@t.TimeLimitMinutes</b> min</span><span><b>@t.PassingScore%</b> pass</span>@if (hasAttempt) { <span class="attempted"><b>@best%</b> best · @attemptCount attempt@(attemptCount == 1 ? "" : "s")</span> }</div></div>
+                                <div class="test-card-action">@if (hasAttempt && best >= t.PassingScore){<span class="passed-badge">Passed</span>}<a class="test-start-btn" asp-action="Take" asp-route-id="@t.Id">Start Test <span>→</span></a></div>
+                            </article>
+                        }
+                    </div><div class="test-no-results" id="testNoResults" hidden>No tests match this filter.</div>
+                }
+            </section>
+        </main>
+    </div>
+</div>
+@section Scripts { <script src="~/js/test-index.js" asp-append-version="true"></script> }
